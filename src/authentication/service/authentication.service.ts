@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AccountStatus } from '@prisma/client';
 import { loginDto } from '../dto/login.dto';
+import { JwtTokenPayload } from 'src/interfaces/auth.model';
 
 @Injectable()
 export class AuthenticationService {
@@ -66,5 +67,28 @@ export class AuthenticationService {
             },
             token,
         };
+    }
+
+    protected async verifyAccount(code: string, token: string) {
+        if (!code) throw new BadRequestException('Code is required');
+
+        const payload = this.jwt.verify<JwtTokenPayload>(token, {
+            secret: this.secretKey,
+        });
+        if (!payload) throw new BadRequestException('token is required');
+
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (payload.exp && payload.exp < currentTime) {
+            throw new BadRequestException('Invalid token or token expired');
+        }
+
+        const user = await this.userRepo.getUserByEmail(payload.sub);
+        if (user.accountStatus === AccountStatus.VERIFIED) {
+            throw new BadRequestException('Account already verified');
+        }
+
+        return await this.userRepo.updateUser(user.id, {
+            accountStatus: AccountStatus.VERIFIED,
+        });
     }
 }
