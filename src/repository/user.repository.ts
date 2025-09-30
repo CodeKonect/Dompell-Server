@@ -9,7 +9,24 @@ export class UserRepository {
     async getUserById(id: string) {
         const user = await this.db.user.findUnique({
             where: { id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                accountStatus: true,
+                traineeProfile: true,
+                employerProfile: true,
+                organizationProfile: true,
+                appointmentsReceived: true,
+                appointmentsSent: true,
+                messagesReceived: true,
+                messagesSent: true,
+                createdAt: true,
+                updatedAt: true,
+            },
         });
+
         if (!user) throw new NotFoundException('User not found');
         return user;
     }
@@ -26,6 +43,7 @@ export class UserRepository {
                 password: true,
             },
         });
+
         if (!user) throw new NotFoundException('User not found');
         return user;
     }
@@ -33,7 +51,9 @@ export class UserRepository {
     async checkExistingUser(email: string) {
         const existingUser = await this.db.user.findUnique({
             where: { email },
+            select: { email: true },
         });
+
         if (!existingUser) throw new NotFoundException('User not found');
         return existingUser;
     }
@@ -42,7 +62,7 @@ export class UserRepository {
         await this.checkExistingUser(data.email);
         const hashedPassword = await getPasswordHash(data.password);
 
-        await this.db.user.create({
+        const newUser = await this.db.user.create({
             data: {
                 name: data.name,
                 email: data.email,
@@ -50,5 +70,7 @@ export class UserRepository {
                 role: data.role,
             },
         });
+
+        return newUser;
     }
 }
