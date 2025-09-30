@@ -17,3 +17,9 @@ export enum AuthToken {
     ACCESS_TOKEN = 'access-tk',
     REFRESH_TOKEN = 'refresh-tk',
 }
+
+export interface JwtTokenPayload {
+    sub: string;
+    token: AuthToken;
+    exp: number;
+}
