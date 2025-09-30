@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { UserRepository } from 'src/repository/user.repository';
 import { RegisterDto } from '../dto/register.dto';
 import { generateCode, loginToken, verifyPassword } from 'src/utils/auth.utils';
@@ -45,7 +49,7 @@ export class AuthenticationService {
             : false;
 
         if (!isUserVerified)
-            throw new BadRequestException(
+            throw new UnauthorizedException(
                 'Please verify your account before you can login',
             );
 
