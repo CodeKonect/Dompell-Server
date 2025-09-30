@@ -77,11 +77,19 @@ export class UserRepository {
     }
 
     public async updateUser(userId: string, data: Prisma.UserUpdateInput) {
-        const updateUser = this.db.user.update({
+        const updateUser = await this.db.user.update({
             where: { id: userId },
             data: data,
         });
 
         return updateUser;
+    }
+
+    public async deleteUser(userId: string) {
+        const deletedUser = await this.db.user.delete({
+            where: { id: userId },
+        });
+
+        return deletedUser;
     }
 }
