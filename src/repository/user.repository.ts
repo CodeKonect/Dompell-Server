@@ -54,7 +54,8 @@ export class UserRepository {
             select: { email: true },
         });
 
-        if (!existingUser) throw new ConflictException('Email already exist, please login');
+        if (!existingUser)
+            throw new ConflictException('Email already exist, please login');
         return existingUser;
     }
 
