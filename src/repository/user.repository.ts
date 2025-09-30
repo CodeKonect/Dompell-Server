@@ -2,11 +2,12 @@ import { DbConnectService } from '../db/db-connect.service';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { getPasswordHash } from '../utils/auth.utils';
 import { Register } from 'src/interfaces/auth.model';
+import { Prisma } from '@prisma/client';
 
 export class UserRepository {
     constructor(private readonly db: DbConnectService) {}
 
-    async getUserById(id: string) {
+    public async getUserById(id: string) {
         const user = await this.db.user.findUnique({
             where: { id },
             select: {
@@ -31,7 +32,7 @@ export class UserRepository {
         return user;
     }
 
-    async getUserByEmail(email: string) {
+    public async getUserByEmail(email: string) {
         const user = await this.db.user.findUnique({
             where: { email },
             select: {
@@ -48,7 +49,7 @@ export class UserRepository {
         return user;
     }
 
-    async checkExistingUser(email: string) {
+    public async checkExistingUser(email: string) {
         const existingUser = await this.db.user.findUnique({
             where: { email },
             select: { email: true },
@@ -59,7 +60,7 @@ export class UserRepository {
         return existingUser;
     }
 
-    async createUser(data: Register) {
+    public async createUser(data: Register) {
         await this.checkExistingUser(data.email);
         const hashedPassword = await getPasswordHash(data.password);
 
@@ -73,5 +74,14 @@ export class UserRepository {
         });
 
         return newUser;
+    }
+
+    public async updateUser(userId: string, data: Prisma.UserUpdateInput) {
+        const updateUser = this.db.user.update({
+            where: { id: userId },
+            data: data,
+        });
+
+        return updateUser;
     }
 }
