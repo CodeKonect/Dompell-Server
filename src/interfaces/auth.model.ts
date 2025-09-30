@@ -7,11 +7,6 @@ export interface Register {
     role: Role;
 }
 
-export interface Login {
-    email: string;
-    password: string;
-}
-
 export interface Payload {
     id: string;
     email: string;
