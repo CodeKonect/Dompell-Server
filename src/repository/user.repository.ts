@@ -1,5 +1,5 @@
 import { DbConnectService } from '../db/db-connect.service';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { getPasswordHash } from '../utils/auth.utils';
 import { Register } from 'src/interfaces/auth.model';
 
@@ -54,7 +54,7 @@ export class UserRepository {
             select: { email: true },
         });
 
-        if (!existingUser) throw new NotFoundException('User not found');
+        if (!existingUser) throw new ConflictException('Email already exist, please login');
         return existingUser;
     }
 
