@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TRAINEE
+  EMPLOYER
+  ORGANIZATION
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum AccountStatus {
+  UNVERIFIED
+  VERIFIED
+  REJECTED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum LocationOptions {
+  REMOTE
+  ON_SITE
+  HYBRID
+}
+
+model User {
+  id            String        @id @default(uuid())
+  name          String
+  email         String        @unique
+  password      String
+  role          Role
+  accountStatus AccountStatus @default(UNVERIFIED)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  traineeProfile       TraineeProfile?
+  employerProfile      EmployerProfile?
+  organizationProfile  OrganizationProfile?
+  appointmentsSent     Appointment[]        @relation("SentAppointments")
+  appointmentsReceived Appointment[]        @relation("ReceivedAppointments")
+  messagesSent         Message[]            @relation("SentMessages")
+  messagesReceived     Message[]            @relation("ReceivedMessages")
+
+  @@index([role])
+  @@index([accountStatus])
+}
+
+model TraineeProfile {
+  id                String   @id @default(uuid())
+  firstName         String
+  lastName          String
+  headline          String?
+  bio               String?  @db.Text
+  profilePictureUrl String?
+  cvUrl             String?
+  location          String?
+  isVerified        Boolean  @default(false)
+  profileComplete   Boolean? @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String               @unique
+  organization   OrganizationProfile? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  organizationId String?
+
+  educations          Education[]
+  experiences         Experience[]
+  certifications      Certification[]
+  portfolioProjects   PortfolioProject[]
+  skills              Skill[]
+  receivedInvitations Invitation[]       @relation("TraineeInvitations")
+
+  @@index([organizationId])
+}
+
+// Profile for users with the EMPLOYER role
+model EmployerProfile {
+  id          String   @id @default(uuid())
+  name        String
+  industry    String?
+  description String?  @db.Text
+  website     String?
+  logoUrl     String?
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+
+  sentInvitations Invitation[] @relation("CompanyInvitations")
+
+  @@index([name])
+  @@index([industry])
+}
+
+// Profile for users with the ORGANIZATION role
+model OrganizationProfile {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String           @unique
+  trainees TraineeProfile[]
+
+  @@index([name])
+}
+
+// Models for building the Trainee's profile
+model Education {
+  id              String    @id @default(uuid())
+  institutionName String
+  qualification   String
+  fieldOfStudy    String?
+  startDate       DateTime
+  endDate         DateTime?
+  description     String?   @db.Text
+  createdAt       DateTime  @default(now())
+
+  traineeProfile   TraineeProfile @relation(fields: [traineeProfileId], references: [id], onDelete: Cascade)
+  traineeProfileId String
+
+  @@index([qualification])
+  @@index([fieldOfStudy])
+}
+
+model Experience {
+  id          String    @id @default(uuid())
+  title       String
+  companyName String
+  location    String?
+  startDate   DateTime
+  endDate     DateTime?
+  description String?   @db.Text
+  createdAt   DateTime  @default(now())
+
+  traineeProfile   TraineeProfile @relation(fields: [traineeProfileId], references: [id], onDelete: Cascade)
+  traineeProfileId String
+
+  @@index([title])
+  @@index([traineeProfileId])
+}
+
+model Certification {
+  id                  String   @id @default(uuid())
+  name                String
+  issuingOrganization String
+  issueDate           DateTime
+  credentialUrl       String?
+  createdAt           DateTime @default(now())
+
+  traineeProfile   TraineeProfile @relation(fields: [traineeProfileId], references: [id], onDelete: Cascade)
+  traineeProfileId String
+
+  @@index([name])
+  @@index([traineeProfileId])
+}
+
+model PortfolioProject {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  projectUrl  String?
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+
+  traineeProfile   TraineeProfile @relation(fields: [traineeProfileId], references: [id], onDelete: Cascade)
+  traineeProfileId String
+}
+
+model Skill {
+  id   String @id @default(uuid())
+  name String @unique
+
+  trainees TraineeProfile[]
+}
+
+// Model for handling job offers and interview requests
+model Invitation {
+  id              String           @id @default(uuid())
+  message         String           @db.Text
+  status          InvitationStatus @default(PENDING)
+  appointmentDate DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  sender     EmployerProfile @relation("CompanyInvitations", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId   String
+  receiver   TraineeProfile  @relation("TraineeInvitations", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId String
+}
+
+model Appointment {
+  id          String            @id @default(uuid())
+  employerId  String
+  traineeId   String
+  scheduledAt DateTime
+  status      AppointmentStatus @default(PENDING)
+  note        String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // The appointment is between two Users
+  employer User @relation("SentAppointments", fields: [employerId], references: [id], onDelete: Cascade)
+  trainee  User @relation("ReceivedAppointments", fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@index([employerId])
+  @@index([traineeId])
+  @@index([status])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+
+  // The message is between two Users
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+}
