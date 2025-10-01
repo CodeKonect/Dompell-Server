@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { AccountStatus } from '@prisma/client';
 import { loginDto } from '../dto/login.dto';
 import { JwtTokenPayload } from 'src/interfaces/auth.model';
+import { MailService } from 'src/mail/service/mail.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -20,6 +21,7 @@ export class AuthenticationService {
     private userRepo: UserRepository,
     private jwt: JwtService,
     private config: ConfigService,
+    private mail: MailService,
   ) {
     this.secretKey = this.config.get<string>('JWT_SECRET');
   }
@@ -35,6 +37,12 @@ export class AuthenticationService {
       { sub: newUser.email, code: optCode },
       { expiresIn: tokenDuration, secret: this.secretKey },
     );
+
+    await this.mail.sendVerificationEmail({
+      email: newUser.email,
+      code: optCode,
+      name: newUser.name,
+    });
 
     return { token };
   }
