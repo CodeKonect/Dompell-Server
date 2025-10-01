@@ -144,4 +144,43 @@ export class AuthenticationService {
       throw new BadRequestException(`Invalid token, ${err.message}`);
     }
   }
+
+  protected async resendCode(email: string) {
+    try {
+      const user = await this.userRepo.getUserByEmail(email);
+      const code = generateCode();
+      return await this.mail.sendVerificationEmail({
+        email: user.email,
+        code,
+        name: user.name,
+      });
+    } catch (error: unknown) {
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      }
+      throw new InternalServerErrorException('Failed to send email');
+    }
+  }
+
+  protected async resendMail(email: string) {
+    try {
+      const user = await this.userRepo.getUserByEmail(email);
+      const token = generateToken(user, this.jwt, this.config);
+
+      return this.mail.sendForgotPasswordEmail({
+        email,
+        token,
+        name: user.name,
+      });
+    } catch (error: unknown) {
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      }
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later',
+      );
+    }
+  }
+    
+    
 }
