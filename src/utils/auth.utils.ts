@@ -51,7 +51,7 @@ export const generateToken = (
   config: ConfigService,
 ) => {
   const secret = config.get<string>('JWT_SECRET');
-  const tokenDuration = '3hr';
+  const tokenDuration = '3h';
 
   return jwt.sign(
     { sub: user.email },
