@@ -10,36 +10,36 @@ export class MailService {
 
   constructor(private mailer: MailerService) {}
 
-  public async sendVerificationEmail(data: VerifyEmail) {
+  public async sendVerificationEmail({ email, code, name }: VerifyEmail) {
     try {
       await this.mailer.sendMail({
-        to: data.email,
+        to: email,
         subject: 'Verify your account',
-        html: verifyEmailTemplate(data.name, data.code),
+        html: verifyEmailTemplate(name, code),
       });
-      this.logger.log(`Email sent to ${data.email}`);
+      this.logger.log(`Email sent to ${email}`);
     } catch (err: unknown) {
       const error = err as Error;
       this.logger.error(
-        `Failed to send email to ${data.email}: ${error.message}`,
+        `Failed to send email to ${email}: ${error.message}`,
         error.stack,
       );
       return false;
     }
   }
 
-  public async sendForgotPasswordEmail(data: ForgetEmail) {
+  public async sendForgotPasswordEmail({ email, token, name }: ForgetEmail) {
     try {
       await this.mailer.sendMail({
-        to: data.email,
+        to: email,
         subject: 'Forget password',
-        html: forgotPasswordTemplate(data.name, data.token),
+        html: forgotPasswordTemplate(name, token),
       });
-      this.logger.log(`Email sent to ${data.email}`);
+      this.logger.log(`Email sent to ${email}`);
     } catch (error: unknown) {
       const err = error as Error;
       this.logger.error(
-        `Failed to send email to ${data.email}: ${err.message}`,
+        `Failed to send email to ${email}: ${err.message}`,
         err.stack,
       );
       return false;
