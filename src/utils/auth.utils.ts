@@ -44,3 +44,17 @@ export const loginToken = (
 
   return { accessToken, refreshToken };
 };
+
+export const generateToken = (
+  user: Payload,
+  jwt: JwtService,
+  config: ConfigService,
+) => {
+  const secret = config.get<string>('JWT_SECRET');
+  const tokenDuration = '3hr';
+
+  return jwt.sign(
+    { sub: user.email },
+    { expiresIn: tokenDuration, secret: secret },
+  );
+};
