@@ -23,3 +23,15 @@ export interface JwtTokenPayload {
   token: AuthToken;
   exp: number;
 }
+
+export interface ForgetEmail {
+  email: string;
+  token: string;
+  name: string;
+}
+
+export interface VerifyEmail {
+  email: string;
+  code: string;
+  name: string;
+}
