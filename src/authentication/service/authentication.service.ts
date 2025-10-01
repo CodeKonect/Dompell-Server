@@ -1,17 +1,25 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserRepository } from 'src/repository/user.repository';
 import { RegisterDto } from '../dto/register.dto';
-import { generateCode, loginToken, verifyPassword } from 'src/utils/auth.utils';
+import {
+  generateCode,
+  generateToken,
+  getPasswordHash,
+  loginToken,
+  verifyPassword,
+} from 'src/utils/auth.utils';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AccountStatus } from '@prisma/client';
 import { loginDto } from '../dto/login.dto';
 import { JwtTokenPayload } from 'src/interfaces/auth.model';
 import { MailService } from 'src/mail/service/mail.service';
+import { ResetPasswordDto } from '../dto/reset.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -98,5 +106,42 @@ export class AuthenticationService {
     return await this.userRepo.updateUser(user.id, {
       accountStatus: AccountStatus.VERIFIED,
     });
+  }
+
+  protected async forgotPassword(email: string) {
+    try {
+      const user = await this.userRepo.getUserByEmail(email);
+      const token = generateToken(user, this.jwt, this.config);
+
+      return await this.mail.sendForgotPasswordEmail({
+        email,
+        token,
+        name: user.name,
+      });
+    } catch (error: unknown) {
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      }
+      throw new InternalServerErrorException(
+        'Something went wrong, try again later',
+      );
+    }
+  }
+
+  protected async resetPassword(user: ResetPasswordDto, token: string) {
+    try {
+      const payload = this.jwt.verify<JwtTokenPayload>(token, {
+        secret: this.secretKey,
+      });
+      const existingUser = await this.userRepo.getUserByEmail(payload.sub);
+      const hashedPassword = await getPasswordHash(user.newPassword);
+
+      return await this.userRepo.updateUser(existingUser.id, {
+        password: hashedPassword,
+      });
+    } catch (error: unknown) {
+      const err = error as Error;
+      throw new BadRequestException(`Invalid token, ${err.message}`);
+    }
   }
 }
