@@ -17,7 +17,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AccountStatus } from '@prisma/client';
 import { loginDto } from '../dto/login.dto';
-import { JwtTokenPayload } from 'src/interfaces/auth.model';
+import { AuthToken, JwtTokenPayload } from 'src/interfaces/auth.model';
 import { MailService } from 'src/mail/service/mail.service';
 import { ResetPasswordDto } from '../dto/reset.dto';
 
@@ -181,6 +181,23 @@ export class AuthenticationService {
       );
     }
   }
-    
-    
+
+  protected async refreshToken(refreshToken: string) {
+    const payload = this.jwt.verify<JwtTokenPayload>(refreshToken, {
+      secret: this.secretKey,
+    });
+    const user = await this.userRepo.getUserById(payload.sub);
+
+    const accessDuration = '1h';
+    const accessToken = this.jwt.sign(
+      {
+        sub: user.id,
+        role: user.role,
+        token: AuthToken.ACCESS_TOKEN,
+      },
+      { expiresIn: accessDuration, secret: this.secretKey },
+    );
+
+    return { accessToken };
+  }
 }
