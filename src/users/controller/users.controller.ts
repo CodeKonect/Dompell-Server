@@ -45,7 +45,7 @@ import { UserUpdateDto } from '../dto/update_user.dto';
 export class UsersController {
   constructor(private userService: UsersService) {}
 
-  @Get('')
+  @Get('all')
   @Roles(Role.ADMIN, Role.ORGANIZATION)
   @HttpCode(200)
   @UseInterceptors(DataMessageInterceptor)
