@@ -35,3 +35,26 @@ export interface VerifyEmail {
   code: string;
   name: string;
 }
+
+export interface AuthRequestProp {
+  headers: {
+    authorization?: string;
+    [key: string]: any;
+  };
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  };
+  [key: string]: any;
+}
+
+export interface Data<T> {
+  message: string;
+  data: T;
+}
+
+export interface MessageOnly {
+  message: string;
+}
