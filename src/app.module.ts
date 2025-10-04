@@ -5,6 +5,7 @@ import { DbModule } from './db/db.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './mail/mail.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { MailModule } from './mail/mail.module';
     DbModule,
     AuthenticationModule,
     MailModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
