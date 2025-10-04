@@ -61,9 +61,7 @@ export class UserRepository {
   }
 
   public async createUser(data: Register) {
-    await this.checkExistingUser(data.email);
     const hashedPassword = await getPasswordHash(data.password);
-
     const newUser = await this.db.user.create({
       data: {
         name: data.name,
