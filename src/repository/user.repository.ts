@@ -4,11 +4,9 @@ import { getPasswordHash } from '../utils/auth.utils';
 import { Register } from 'src/interfaces/auth.model';
 import { Prisma } from '@prisma/client';
 
-export class UserRepository {
-  constructor(private readonly db: DbConnectService) {}
-
+export class UserRepository extends DbConnectService {
   public async getUserById(id: string) {
-    const user = await this.db.user.findUnique({
+    const user = await this.user.findUnique({
       where: { id },
       select: {
         id: true,
@@ -33,7 +31,7 @@ export class UserRepository {
   }
 
   public async getUserByEmail(email: string) {
-    const user = await this.db.user.findUnique({
+    const user = await this.user.findUnique({
       where: { email },
       select: {
         id: true,
@@ -50,7 +48,7 @@ export class UserRepository {
   }
 
   public async checkExistingUser(email: string) {
-    const existingUser = await this.db.user.findUnique({
+    const existingUser = await this.user.findUnique({
       where: { email },
       select: { email: true },
     });
@@ -62,7 +60,7 @@ export class UserRepository {
 
   public async createUser(data: Register) {
     const hashedPassword = await getPasswordHash(data.password);
-    const newUser = await this.db.user.create({
+    const newUser = await this.user.create({
       data: {
         name: data.name,
         email: data.email,
@@ -75,7 +73,7 @@ export class UserRepository {
   }
 
   public async updateUser(userId: string, data: Prisma.UserUpdateInput) {
-    const updateUser = await this.db.user.update({
+    const updateUser = await this.user.update({
       where: { id: userId },
       data: data,
     });
@@ -84,10 +82,8 @@ export class UserRepository {
   }
 
   public async deleteUser(userId: string) {
-    const deletedUser = await this.db.user.delete({
+    return await this.user.delete({
       where: { id: userId },
     });
-
-    return deletedUser;
   }
 }
