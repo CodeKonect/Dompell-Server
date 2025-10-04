@@ -34,7 +34,7 @@ export class AuthenticationService {
     this.secretKey = this.config.get<string>('JWT_SECRET');
   }
 
-  protected async register(user: RegisterDto) {
+  public async register(user: RegisterDto) {
     await this.userRepo.checkExistingUser(user.email);
     const newUser = await this.userRepo.createUser(user);
 
@@ -55,15 +55,13 @@ export class AuthenticationService {
     return { token };
   }
 
-  protected async login(user: loginDto) {
+  public async login(user: loginDto) {
     const foundUser = await this.userRepo.getUserByEmail(user.email);
     const validPassword = await verifyPassword(
       user.password,
       foundUser.password,
     );
-    const isUserVerified = foundUser
-      ? foundUser.accountStatus === AccountStatus.VERIFIED
-      : false;
+    const isUserVerified = foundUser.accountStatus === AccountStatus.VERIFIED;
 
     if (!isUserVerified)
       throw new UnauthorizedException(
@@ -73,7 +71,12 @@ export class AuthenticationService {
     if (!validPassword)
       throw new BadRequestException('Invalid email or password');
 
-    const token = loginToken(foundUser, this.jwt, this.config);
+    const payload = {
+      id: foundUser.id,
+      email: foundUser.email,
+      role: foundUser.role,
+    };
+    const token = loginToken(payload, this.jwt, this.config);
     return {
       user: {
         id: foundUser.id,
@@ -85,7 +88,7 @@ export class AuthenticationService {
     };
   }
 
-  protected async verifyAccount(code: string, token: string) {
+  public async verifyAccount(code: string, token: string) {
     if (!code) throw new BadRequestException('Code is required');
 
     const payload = this.jwt.verify<JwtTokenPayload>(token, {
@@ -108,7 +111,7 @@ export class AuthenticationService {
     });
   }
 
-  protected async forgotPassword(email: string) {
+  public async forgotPassword(email: string) {
     try {
       const user = await this.userRepo.getUserByEmail(email);
       const token = generateToken(user, this.jwt, this.config);
@@ -128,7 +131,7 @@ export class AuthenticationService {
     }
   }
 
-  protected async resetPassword(user: ResetPasswordDto, token: string) {
+  public async resetPassword(user: ResetPasswordDto, token: string) {
     try {
       const payload = this.jwt.verify<JwtTokenPayload>(token, {
         secret: this.secretKey,
@@ -145,7 +148,7 @@ export class AuthenticationService {
     }
   }
 
-  protected async resendCode(email: string) {
+  public async resendCode(email: string) {
     try {
       const user = await this.userRepo.getUserByEmail(email);
       const code = generateCode();
@@ -162,7 +165,7 @@ export class AuthenticationService {
     }
   }
 
-  protected async resendMail(email: string) {
+  public async resendMail(email: string) {
     try {
       const user = await this.userRepo.getUserByEmail(email);
       const token = generateToken(user, this.jwt, this.config);
@@ -182,7 +185,7 @@ export class AuthenticationService {
     }
   }
 
-  protected async refreshToken(refreshToken: string) {
+  public async refreshToken(refreshToken: string) {
     const payload = this.jwt.verify<JwtTokenPayload>(refreshToken, {
       secret: this.secretKey,
     });
