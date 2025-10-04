@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpCode,
   Post,
   Query,
   SetMetadata,
@@ -36,6 +37,7 @@ export class AuthenticationController {
   public constructor(private as: AuthenticationService) {}
 
   @Post('register')
+  @HttpCode(201)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'Account registered successfully')
@@ -64,6 +66,7 @@ export class AuthenticationController {
   }
 
   @Post('verify-account')
+  @HttpCode(200)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(MessageInterceptor)
   @SetMetadata('message', 'Account verified successfully')
@@ -89,6 +92,7 @@ export class AuthenticationController {
   }
 
   @Post('login')
+  @HttpCode(200)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'Login successful')
@@ -112,6 +116,7 @@ export class AuthenticationController {
   }
 
   @Post('forgot-password')
+  @HttpCode(200)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(MessageInterceptor)
   @SetMetadata('message', 'Email sent successfully with opt code')
@@ -132,6 +137,7 @@ export class AuthenticationController {
   }
 
   @Post('reset-password')
+  @HttpCode(200)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(MessageInterceptor)
   @SetMetadata('message', 'Password reset successful')
@@ -155,6 +161,7 @@ export class AuthenticationController {
   }
 
   @Post('resend-code')
+  @HttpCode(200)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(MessageInterceptor)
   @SetMetadata('message', 'Code sent successfully')
@@ -175,6 +182,7 @@ export class AuthenticationController {
   }
 
   @Post('resend-email')
+  @HttpCode(200)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(MessageInterceptor)
   @SetMetadata('message', 'New email sent successfully')
@@ -195,6 +203,7 @@ export class AuthenticationController {
   }
 
   @Post('refresh-token')
+  @HttpCode(200)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'New access token acquired')
