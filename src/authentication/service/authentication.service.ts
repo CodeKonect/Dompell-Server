@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserRepository } from 'src/repository/user.repository';
@@ -35,7 +37,10 @@ export class AuthenticationService {
   }
 
   public async register(user: RegisterDto) {
-    await this.userRepo.checkExistingUser(user.email);
+    const existingUser = await this.userRepo.checkExistingUser(user.email);
+    if (existingUser) {
+      throw new ConflictException('Email already exist, please login');
+    }
     const newUser = await this.userRepo.createUser(user);
 
     const optCode = generateCode();
@@ -57,19 +62,22 @@ export class AuthenticationService {
 
   public async login(user: loginDto) {
     const foundUser = await this.userRepo.getUserByEmail(user.email);
+    if (!foundUser) {
+      throw new NotFoundException('Invalid email or password');
+    }
     const validPassword = await verifyPassword(
       user.password,
       foundUser.password,
     );
-    const isUserVerified = foundUser.accountStatus === AccountStatus.VERIFIED;
+    if (!validPassword) {
+      throw new BadRequestException('Invalid email or password');
+    }
 
-    if (!isUserVerified)
+    if (foundUser.accountStatus !== AccountStatus.VERIFIED) {
       throw new UnauthorizedException(
         'Please verify your account before you can login',
       );
-
-    if (!validPassword)
-      throw new BadRequestException('Invalid email or password');
+    }
 
     const payload = {
       id: foundUser.id,
@@ -102,6 +110,9 @@ export class AuthenticationService {
     }
 
     const user = await this.userRepo.getUserByEmail(payload.sub);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     if (user.accountStatus === AccountStatus.VERIFIED) {
       throw new BadRequestException('Account already verified');
     }
@@ -114,6 +125,9 @@ export class AuthenticationService {
   public async forgotPassword(email: string) {
     try {
       const user = await this.userRepo.getUserByEmail(email);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
       const token = generateToken(user, this.jwt, this.config);
 
       return await this.mail.sendForgotPasswordEmail({
@@ -137,6 +151,9 @@ export class AuthenticationService {
         secret: this.secretKey,
       });
       const existingUser = await this.userRepo.getUserByEmail(payload.sub);
+      if (!existingUser) {
+        throw new NotFoundException('User not found');
+      }
       const hashedPassword = await getPasswordHash(user.newPassword);
 
       return await this.userRepo.updateUser(existingUser.id, {
@@ -151,6 +168,9 @@ export class AuthenticationService {
   public async resendCode(email: string) {
     try {
       const user = await this.userRepo.getUserByEmail(email);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
       const code = generateCode();
       return await this.mail.sendVerificationEmail({
         email: user.email,
@@ -168,6 +188,9 @@ export class AuthenticationService {
   public async resendMail(email: string) {
     try {
       const user = await this.userRepo.getUserByEmail(email);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
       const token = generateToken(user, this.jwt, this.config);
 
       return this.mail.sendForgotPasswordEmail({
