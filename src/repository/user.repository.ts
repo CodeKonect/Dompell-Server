@@ -1,5 +1,5 @@
 import { DbConnectService } from '../db/db-connect.service';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { getPasswordHash } from '../utils/auth.utils';
 import { Register } from 'src/interfaces/auth.model';
 import { Prisma } from '@prisma/client';
@@ -43,7 +43,6 @@ export class UserRepository extends DbConnectService {
       },
     });
 
-    if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
@@ -53,9 +52,7 @@ export class UserRepository extends DbConnectService {
       select: { email: true },
     });
 
-    if (!existingUser)
-      throw new ConflictException('Email already exist, please login');
-    return existingUser;
+    return !!existingUser;
   }
 
   public async createUser(data: Register) {
