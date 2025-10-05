@@ -69,6 +69,7 @@ model TraineeProfile {
   headline          String?
   bio               String?  @db.Text
   profilePictureUrl String?
+  banner            String?
   cvUrl             String?
   location          String?
   isVerified        Boolean  @default(false)
