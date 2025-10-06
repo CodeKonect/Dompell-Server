@@ -78,4 +78,10 @@ export class OrganizationRepository extends DbConnectService {
 
     return upsertOrganization;
   }
+
+  public async deleteOrganization(id: string) {
+    return await this.institutionProfile.delete({
+      where: { id },
+    });
+  }
 }
