@@ -60,11 +60,11 @@ export class RegisterDto {
   confirmPassword: string;
 
   @ApiProperty({
-    example: Role.TRAINEE,
+    example: Role.INSTITUTION,
     enum: Role,
     required: true,
     description:
-      'The user role, must be one of: TRAINEE, ORGANIZATION, MENTOR, ADMIN',
+      'The user role, must be one of: TRAINEE, INSTITUTION, MENTOR, ADMIN',
   })
   @IsEnum(Role)
   @IsNotEmpty()
