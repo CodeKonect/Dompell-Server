@@ -1,5 +1,4 @@
 import { DbConnectService } from '../db/db-connect.service';
-import { NotFoundException } from '@nestjs/common';
 import { getPasswordHash } from '../utils/auth.utils';
 import { Register } from 'src/interfaces/auth.model';
 import { Prisma } from '@prisma/client';
@@ -26,7 +25,6 @@ export class UserRepository extends DbConnectService {
       },
     });
 
-    if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
