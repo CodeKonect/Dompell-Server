@@ -1,4 +1,5 @@
 import { DbConnectService } from 'src/db/db-connect.service';
+import { OrganizationProfileDto } from 'src/organization/dto/create_update.dto';
 
 export class OrganizationRepository extends DbConnectService {
   public async getOrganizationById(id: string) {
@@ -37,5 +38,44 @@ export class OrganizationRepository extends DbConnectService {
     });
 
     return organizations;
+  }
+
+  public async createOrganization(
+    userId: string,
+    data: OrganizationProfileDto,
+  ) {
+    const upsertOrganization = await this.institutionProfile.upsert({
+      where: { userId },
+      update: {
+        institutionName: data.institutionName,
+        institutionType: data.institutionType,
+        description: data.description,
+        missionVision: data.missionVision,
+        logoUrl: data.logoUrl,
+        websiteUrl: data.websiteUrl,
+        accreditationDetails: data.accreditationDetails,
+        contactEmail: data.contactEmail,
+        contactPhone: data.contactPhone,
+      },
+      create: {
+        institutionName: data.institutionName,
+        institutionType: data.institutionType,
+        description: data.description,
+        missionVision: data.missionVision,
+        logoUrl: data.logoUrl,
+        websiteUrl: data.websiteUrl,
+        accreditationDetails: data.accreditationDetails,
+        contactEmail: data.contactEmail,
+        contactPhone: data.contactPhone,
+        user: {
+          connect: { id: userId },
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    return upsertOrganization;
   }
 }
