@@ -13,4 +13,19 @@ export class OrganizationRepository extends DbConnectService {
 
     return organization;
   }
+
+  public async getOrganizationUser(userId: string) {
+    const organization = await this.institutionProfile.findUnique({
+      where: { userId },
+      include: {
+        user: true,
+        trainingPrograms: true,
+        invitationsSent: true,
+      },
+    });
+
+    return organization;
+  }
+    
+
 }
