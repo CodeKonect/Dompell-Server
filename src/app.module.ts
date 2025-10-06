@@ -8,6 +8,7 @@ import { MailModule } from './mail/mail.module';
 import { UsersModule } from './users/users.module';
 import { S3BucketModule } from './s3-bucket/s3-bucket.module';
 import { OrganizationModule } from './organization/organization.module';
+import { OrganizationService } from './service/organization/organization.service';
 
 @Module({
   imports: [
@@ -23,6 +24,6 @@ import { OrganizationModule } from './organization/organization.module';
     OrganizationModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, OrganizationService],
 })
 export class AppModule {}
