@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './mail/mail.module';
 import { UsersModule } from './users/users.module';
 import { S3BucketModule } from './s3-bucket/s3-bucket.module';
+import { OrganizationModule } from './organization/organization.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { S3BucketModule } from './s3-bucket/s3-bucket.module';
     MailModule,
     UsersModule,
     S3BucketModule,
+    OrganizationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
