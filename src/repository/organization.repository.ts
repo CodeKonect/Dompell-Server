@@ -26,6 +26,16 @@ export class OrganizationRepository extends DbConnectService {
 
     return organization;
   }
-    
 
+  public async getOrganizationUsers() {
+    const organizations = await this.institutionProfile.findMany({
+      include: {
+        user: true,
+        trainingPrograms: true,
+        invitationsSent: true,
+      },
+    });
+
+    return organizations;
+  }
 }
