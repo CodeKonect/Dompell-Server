@@ -84,4 +84,15 @@ export class OrganizationRepository extends DbConnectService {
       where: { id },
     });
   }
+
+  public async getOrgTrainingPrograms(id: string) {
+    const organization = await this.institutionProfile.findUnique({
+      where: { id },
+      include: {
+        trainingPrograms: true,
+      },
+    });
+
+    return organization?.trainingPrograms || [];
+  }
 }
