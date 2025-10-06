@@ -7,11 +7,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- ENUMS ---
+
 enum Role {
   TRAINEE
   EMPLOYER
-  ORGANIZATION
+  INSTITUTION // Renamed from ORGANIZATION to align with platform UI and new models
   ADMIN
+}
+
+enum AccountStatus {
+  UNVERIFIED
+  VERIFIED
+  REJECTED
+}
+
+// Renamed from InvitationStatus to be more specific to employers
+enum EmployerInvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+// NEW: Status for institution program invitations
+enum ProgramInvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+// NEW: Status for a trainee's enrollment in a program
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED_OUT
 }
 
 enum AppointmentStatus {
@@ -22,77 +53,59 @@ enum AppointmentStatus {
   CANCELLED
 }
 
-enum AccountStatus {
-  UNVERIFIED
-  VERIFIED
-  REJECTED
-}
-
-enum InvitationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-}
-
-enum LocationOptions {
-  REMOTE
-  ON_SITE
-  HYBRID
-}
+// --- CORE MODELS ---
 
 model User {
-  id            String        @id @default(uuid())
-  name          String
-  email         String        @unique
-  password      String
-  role          Role
-  accountStatus AccountStatus @default(UNVERIFIED)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  traineeProfile       TraineeProfile?
-  employerProfile      EmployerProfile?
-  organizationProfile  OrganizationProfile?
-  appointmentsSent     Appointment[]        @relation("SentAppointments")
-  appointmentsReceived Appointment[]        @relation("ReceivedAppointments")
-  messagesSent         Message[]            @relation("SentMessages")
-  messagesReceived     Message[]            @relation("ReceivedMessages")
+  id                String             @id @default(uuid())
+  name              String
+  email             String             @unique
+  password          String
+  role              Role
+  accountStatus     AccountStatus      @default(UNVERIFIED)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  traineeProfile    TraineeProfile?
+  employerProfile   EmployerProfile?
+  institutionProfile InstitutionProfile? // UPDATED: Renamed relation
+  appointmentsSent     Appointment[]      @relation("SentAppointments")
+  appointmentsReceived Appointment[]      @relation("ReceivedAppointments")
+  messagesSent         Message[]          @relation("SentMessages")
+  messagesReceived     Message[]          @relation("ReceivedMessages")
 
   @@index([role])
   @@index([accountStatus])
 }
 
+// --- PROFILE MODELS ---
+
 model TraineeProfile {
-  id                String   @id @default(uuid())
+  id                String       @id @default(uuid())
   firstName         String
   lastName          String
   headline          String?
-  bio               String?  @db.Text
+  bio               String?      @db.Text
   profilePictureUrl String?
-  banner            String?
   cvUrl             String?
   location          String?
-  isVerified        Boolean  @default(false)
-  profileComplete   Boolean? @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  isVerified        Boolean      @default(false) // This can be set by the Institution
+  profileComplete   Boolean?     @default(false)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String       @unique
+  educations        Education[]
+  experiences       Experience[]
+  certifications    Certification[]
+  portfolioProjects PortfolioProject[]
+  skills            Skill[]
 
-  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String               @unique
-  organization   OrganizationProfile? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  organizationId String?
-
-  educations          Education[]
-  experiences         Experience[]
-  certifications      Certification[]
-  portfolioProjects   PortfolioProject[]
-  skills              Skill[]
-  receivedInvitations Invitation[]       @relation("TraineeInvitations")
-
-  @@index([organizationId])
+  // UPDATED: The relationship with an institution is now through Enrollment, not a direct link.
+  // This allows a trainee to be part of multiple programs/institutions over time.
+  enrollments               Enrollment[]
+  receivedEmployerInvitations EmployerInvitation[] // UPDATED: Renamed relation for clarity
+  receivedProgramInvitations  ProgramInvitation[]  // NEW: Relation for program invites
 }
 
-// Profile for users with the EMPLOYER role
 model EmployerProfile {
   id          String   @id @default(uuid())
   name        String
@@ -103,90 +116,157 @@ model EmployerProfile {
   location    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique
-
-  sentInvitations Invitation[] @relation("CompanyInvitations")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String   @unique
+  // UPDATED: Renamed relation for clarity
+  sentInvitations EmployerInvitation[] @relation("CompanyInvitations")
 
   @@index([name])
   @@index([industry])
 }
 
-// Profile for users with the ORGANIZATION role
-model OrganizationProfile {
-  id          String   @id @default(uuid())
-  name        String
-  description String?  @db.Text
-  logoUrl     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// REPLACED: Your old OrganizationProfile is replaced with this more detailed version
+model InstitutionProfile {
+  id                    String            @id @default(uuid())
+  institutionName       String
+  institutionType       String?           // e.g., University, Vocational School
+  description           String?           @db.Text
+  missionVision         String?           @db.Text
+  logoUrl               String?
+  websiteUrl            String?
+  accreditationDetails  String?           @db.Text
+  contactEmail          String?
+  contactPhone          String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String            @unique
+  trainingPrograms      TrainingProgram[]
+  invitationsSent       ProgramInvitation[]
 
-  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   String           @unique
-  trainees TraineeProfile[]
-
-  @@index([name])
+  @@index([institutionName])
 }
 
-// Models for building the Trainee's profile
-model Education {
-  id              String    @id @default(uuid())
-  institutionName String
-  qualification   String
-  fieldOfStudy    String?
-  startDate       DateTime
-  endDate         DateTime?
-  description     String?   @db.Text
-  createdAt       DateTime  @default(now())
+// --- NEW INSTITUTION-FOCUSED MODELS ---
 
+// NEW: Represents a specific training program offered by an institution
+model TrainingProgram {
+  id                       String              @id @default(uuid())
+  title                    String
+  description              String              @db.Text
+  keyLearningOutcomes      String[]
+  duration                 String
+  associatedCertifications String[]
+  startDate                DateTime
+  endDate                  DateTime
+  eligibilityCriteria      String              @db.Text
+  applicationProcess       String              @db.Text
+  brochureUrl              String?
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  institution              InstitutionProfile  @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  institutionId            String
+  enrollments              Enrollment[]
+  invitations              ProgramInvitation[]
+
+  @@index([institutionId])
+}
+
+// NEW: Manages invitations from an Institution for a Trainee to join a specific program
+model ProgramInvitation {
+  id                String                @id @default(uuid())
+  status            ProgramInvitationStatus @default(PENDING)
+  traineeEmail      String                // Invite by email
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  institution       InstitutionProfile    @relation(fields: [institutionId], references: [id], onDelete: Cascade)
+  institutionId     String
+  trainingProgram   TrainingProgram       @relation(fields: [trainingProgramId], references: [id], onDelete: Cascade)
+  trainingProgramId String
+  trainee           TraineeProfile?       @relation(fields: [traineeId], references: [id], onDelete: SetNull)
+  traineeId         String?
+
+  @@unique([traineeEmail, trainingProgramId])
+  @@index([institutionId, trainingProgramId])
+}
+
+// NEW: Represents a verified link between a trainee and a training program
+model Enrollment {
+  id                String           @id @default(uuid())
+  status            EnrollmentStatus @default(ACTIVE)
+  enrolledAt        DateTime         @default(now())
+  completedAt       DateTime?
+  trainee           TraineeProfile   @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  traineeId         String
+  trainingProgram   TrainingProgram  @relation(fields: [trainingProgramId], references: [id], onDelete: Cascade)
+  trainingProgramId String
+
+  @@unique([traineeId, trainingProgramId])
+  @@index([traineeId])
+  @@index([trainingProgramId])
+}
+
+
+// --- EXISTING MODELS (with necessary updates) ---
+
+// UPDATED: Renamed to avoid confusion with the new ProgramInvitation model
+model EmployerInvitation {
+  id              String                   @id @default(uuid())
+  message         String                   @db.Text
+  status          EmployerInvitationStatus @default(PENDING)
+  appointmentDate DateTime?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  sender          EmployerProfile          @relation("CompanyInvitations", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId        String
+  receiver        TraineeProfile           @relation(fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId      String
+}
+
+model Education {
+  id               String         @id @default(uuid())
+  institutionName  String
+  qualification    String
+  fieldOfStudy     String?
+  startDate        DateTime
+  endDate          DateTime?
+  description      String?        @db.Text
+  createdAt        DateTime       @default(now())
   traineeProfile   TraineeProfile @relation(fields: [traineeProfileId], references: [id], onDelete: Cascade)
   traineeProfileId String
-
-  @@index([qualification])
-  @@index([fieldOfStudy])
 }
 
 model Experience {
-  id          String    @id @default(uuid())
-  title       String
-  companyName String
-  location    String?
-  startDate   DateTime
-  endDate     DateTime?
-  description String?   @db.Text
-  createdAt   DateTime  @default(now())
-
+  id               String         @id @default(uuid())
+  title            String
+  companyName      String
+  location         String?
+  startDate        DateTime
+  endDate          DateTime?
+  description      String?        @db.Text
+  createdAt        DateTime       @default(now())
   traineeProfile   TraineeProfile @relation(fields: [traineeProfileId], references: [id], onDelete: Cascade)
   traineeProfileId String
-
-  @@index([title])
-  @@index([traineeProfileId])
 }
 
 model Certification {
-  id                  String   @id @default(uuid())
+  id                  String         @id @default(uuid())
   name                String
   issuingOrganization String
   issueDate           DateTime
   credentialUrl       String?
-  createdAt           DateTime @default(now())
-
-  traineeProfile   TraineeProfile @relation(fields: [traineeProfileId], references: [id], onDelete: Cascade)
-  traineeProfileId String
-
-  @@index([name])
-  @@index([traineeProfileId])
+  createdAt           DateTime       @default(now())
+  traineeProfile      TraineeProfile @relation(fields: [traineeProfileId], references: [id], onDelete: Cascade)
+  traineeProfileId    String
 }
 
 model PortfolioProject {
-  id          String   @id @default(uuid())
-  title       String
-  description String   @db.Text
-  projectUrl  String?
-  imageUrl    String?
-  createdAt   DateTime @default(now())
-
+  id               String         @id @default(uuid())
+  title            String
+  description      String         @db.Text
+  projectUrl       String?
+  imageUrl         String?
+  createdAt        DateTime       @default(now())
   traineeProfile   TraineeProfile @relation(fields: [traineeProfileId], references: [id], onDelete: Cascade)
   traineeProfileId String
 }
@@ -198,21 +278,6 @@ model Skill {
   trainees TraineeProfile[]
 }
 
-// Model for handling job offers and interview requests
-model Invitation {
-  id              String           @id @default(uuid())
-  message         String           @db.Text
-  status          InvitationStatus @default(PENDING)
-  appointmentDate DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-
-  sender     EmployerProfile @relation("CompanyInvitations", fields: [senderId], references: [id], onDelete: Cascade)
-  senderId   String
-  receiver   TraineeProfile  @relation("TraineeInvitations", fields: [receiverId], references: [id], onDelete: Cascade)
-  receiverId String
-}
-
 model Appointment {
   id          String            @id @default(uuid())
   employerId  String
@@ -222,14 +287,10 @@ model Appointment {
   note        String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+  employer    User              @relation("SentAppointments", fields: [employerId], references: [id], onDelete: Cascade)
+  trainee     User              @relation("ReceivedAppointments", fields: [traineeId], references: [id], onDelete: Cascade)
 
-  // The appointment is between two Users
-  employer User @relation("SentAppointments", fields: [employerId], references: [id], onDelete: Cascade)
-  trainee  User @relation("ReceivedAppointments", fields: [traineeId], references: [id], onDelete: Cascade)
-
-  @@index([employerId])
-  @@index([traineeId])
-  @@index([status])
+  @@index([employerId, traineeId])
 }
 
 model Message {
@@ -238,11 +299,8 @@ model Message {
   receiverId String
   content    String   @db.Text
   createdAt  DateTime @default(now())
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
-  // The message is between two Users
-  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
-
-  @@index([senderId])
-  @@index([receiverId])
+  @@index([senderId, receiverId])
 }
