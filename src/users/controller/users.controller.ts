@@ -46,7 +46,7 @@ export class UsersController {
   constructor(private userService: UsersService) {}
 
   @Get('all')
-  @Roles(Role.ADMIN, Role.ORGANIZATION)
+  @Roles(Role.ADMIN, Role.INSTITUTION)
   @HttpCode(200)
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'Users fetched successfully')
@@ -126,7 +126,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.ORGANIZATION)
+  @Roles(Role.ADMIN, Role.INSTITUTION)
   @HttpCode(200)
   @UseInterceptors(MessageInterceptor)
   @SetMetadata('message', 'User deleted successfully')
