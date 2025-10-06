@@ -16,7 +16,7 @@ export class UserRepository extends DbConnectService {
         accountStatus: true,
         traineeProfile: true,
         employerProfile: true,
-        organizationProfile: true,
+        institutionProfile: true,
         appointmentsReceived: true,
         appointmentsSent: true,
         messagesReceived: true,
