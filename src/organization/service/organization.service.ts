@@ -11,4 +11,14 @@ export class OrganizationService extends OrganizationRepository {
 
     return organization;
   }
+
+  public async getOrganizationByUserId(userId: string) {
+    const organization = await this.getOrganizationUser(userId);
+
+    if (!organization) {
+      throw new NotFoundException(`No organization found for user ${userId}`);
+    }
+
+    return organization;
+  }
 }
