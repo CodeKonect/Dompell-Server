@@ -6,7 +6,9 @@ export class OrganizationRepository extends DbConnectService {
     const organization = await this.institutionProfile.findUnique({
       where: { id },
       include: {
-        user: true,
+        user: {
+          select: { id: true, email: true, role: true, name: true },
+        },
         trainingPrograms: true,
         invitationsSent: true,
       },
@@ -19,7 +21,9 @@ export class OrganizationRepository extends DbConnectService {
     const organization = await this.institutionProfile.findUnique({
       where: { userId },
       include: {
-        user: true,
+        user: {
+          select: { id: true, email: true, role: true, name: true },
+        },
         trainingPrograms: true,
         invitationsSent: true,
       },
@@ -31,7 +35,9 @@ export class OrganizationRepository extends DbConnectService {
   public async getOrganizationUsers() {
     const organizations = await this.institutionProfile.findMany({
       include: {
-        user: true,
+        user: {
+          select: { id: true, email: true, role: true, name: true },
+        },
         trainingPrograms: true,
         invitationsSent: true,
       },
@@ -72,7 +78,9 @@ export class OrganizationRepository extends DbConnectService {
         },
       },
       include: {
-        user: true,
+        user: {
+          select: { id: true, email: true, role: true, name: true },
+        },
       },
     });
 
