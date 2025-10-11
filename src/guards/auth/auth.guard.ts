@@ -37,6 +37,11 @@ export class AuthGuard implements CanActivate {
       });
 
       const user = await this.userRepo.getUserById(payload.sub);
+      if (!user) {
+        throw new UnauthorizedException(
+          'User associated with this token no longer exists.',
+        );
+      }
       if (
         (user.accountStatus !== 'VERIFIED' && !user) ||
         payload.token !== AuthToken.ACCESS_TOKEN
