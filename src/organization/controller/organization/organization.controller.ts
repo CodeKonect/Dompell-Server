@@ -2,23 +2,29 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   HttpCode,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseUUIDPipe,
   Post,
   SetMetadata,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiBody,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { AuthGuard } from 'src/guards/auth/auth.guard';
@@ -44,12 +50,29 @@ export class OrganizationController {
   @Roles(Role.ADMIN, Role.INSTITUTION)
   @HttpCode(201)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  @UseInterceptors(DataMessageInterceptor)
+  @UseInterceptors(DataMessageInterceptor, FileInterceptor('logo'))
   @SetMetadata('message', 'Organization created or updated successfully')
   @ApiOperation({ summary: 'Create or update an organization' })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: 'Organization request body',
-    type: OrganizationProfileDto,
+    description: 'Organization data and logo file',
+    schema: {
+      type: 'object',
+      properties: {
+        institutionName: { type: 'string' },
+        institutionType: { type: 'string' },
+        description: { type: 'string' },
+        missionVision: { type: 'string' },
+        websiteUrl: { type: 'string' },
+        accreditationDetails: { type: 'string' },
+        contactEmail: { type: 'string' },
+        contactPhone: { type: 'string' },
+        logo: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 201,
@@ -72,8 +95,18 @@ export class OrganizationController {
   async createOrganization(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body() data: OrganizationProfileDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    logo?: Express.Multer.File,
   ) {
-    return await this.os.createOrUpdateOrganization(userId, data);
+    return await this.os.createOrUpdateOrganization(userId, data, logo);
   }
 
   @Get('')
