@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { OrganizationProfileDto } from 'src/organization/dto/create_update.dto';
 import { OrganizationRepository } from 'src/repository/organization.repository';
-import { OrganizationProfileDto } from '../dto/create_update.dto';
 
 @Injectable()
 export class OrganizationService extends OrganizationRepository {
