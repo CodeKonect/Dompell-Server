@@ -7,6 +7,7 @@ import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { OrganizationRepository } from 'src/repository/organization.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { UserRepository } from 'src/repository/user.repository';
+import { S3Service } from 'src/s3-bucket/service/s3.service';
 
 @Module({
   imports: [JwtModule],
@@ -16,6 +17,7 @@ import { UserRepository } from 'src/repository/user.repository';
     AuthGuard,
     OrganizationRepository,
     UserRepository,
+    S3Service,
   ],
   controllers: [OrganizationController, ProgramsController],
 })
