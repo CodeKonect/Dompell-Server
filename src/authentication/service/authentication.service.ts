@@ -213,6 +213,9 @@ export class AuthenticationService {
       secret: this.secretKey,
     });
     const user = await this.userRepo.getUserById(payload.sub);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     const accessDuration = '1h';
     const accessToken = this.jwt.sign(
