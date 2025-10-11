@@ -1,10 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { OrganizationProfileDto } from 'src/organization/dto/create_update.dto';
 import { OrganizationRepository } from 'src/repository/organization.repository';
 
 @Injectable()
 export class OrganizationService extends OrganizationRepository {
   public async getOrganizationProfile(id: string) {
+    if (!id) {
+      throw new BadRequestException(`User ID is required`);
+    }
+
     const organization = await this.getOrganizationById(id);
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${id} not found`);
@@ -14,6 +22,9 @@ export class OrganizationService extends OrganizationRepository {
   }
 
   public async getOrganizationByUserId(userId: string) {
+    if (!userId) {
+      throw new BadRequestException(`User ID is required`);
+    }
     const organization = await this.getOrganizationUser(userId);
 
     if (!organization) {
@@ -31,10 +42,24 @@ export class OrganizationService extends OrganizationRepository {
     userId: string,
     data: OrganizationProfileDto,
   ) {
+    if (!userId) {
+      throw new BadRequestException(`User ID is required`);
+    }
+
+    const user = await this.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    userId = user.id;
+
     return await this.createOrganization(userId, data);
   }
 
   public async deleteOrganization(id: string) {
+    if (!id) {
+      throw new BadRequestException(`Organization ID is required`);
+    }
+
     const organization = await this.getOrganizationById(id);
 
     if (!organization) {
@@ -44,12 +69,16 @@ export class OrganizationService extends OrganizationRepository {
     return await super.deleteOrganization(id);
   }
 
-  public async getOrganizationTrainingPrograms(orgId: string) {
-    const programs = await this.getOrgTrainingPrograms(orgId);
+  public async getOrganizationTrainingPrograms(organizationId: string) {
+    if (!organizationId) {
+      throw new BadRequestException(`Organization ID is required`);
+    }
+
+    const programs = await this.getOrgTrainingPrograms(organizationId);
 
     if (!programs.length) {
       throw new NotFoundException(
-        `No training programs found for organization ${orgId}`,
+        `No training programs found for organization ${organizationId}`,
       );
     }
 
