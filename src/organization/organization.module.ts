@@ -3,9 +3,18 @@ import { OrganizationService } from './service/organization/organization.service
 import { ProgramsService } from './service/programs/programs.service';
 import { ProgramsController } from './controller/programs/programs.controller';
 import { OrganizationController } from './controller/organization/organization.controller';
+import { AuthGuard } from 'src/guards/auth/auth.guard';
+import { OrganizationRepository } from 'src/repository/organization.repository';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  providers: [OrganizationService, ProgramsService],
+  imports: [JwtModule],
+  providers: [
+    OrganizationService,
+    ProgramsService,
+    AuthGuard,
+    OrganizationRepository,
+  ],
   controllers: [OrganizationController, ProgramsController],
 })
 export class OrganizationModule {}
