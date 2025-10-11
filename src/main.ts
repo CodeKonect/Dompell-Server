@@ -16,7 +16,7 @@ async function bootstrap() {
     .setDescription('REST API for Dompell Web Application')
     .setVersion('1.0.0')
     .addServer(`'http://localhost:'${port}/`, 'Local environment')
-    .addServer('http://localhost:', 'Production')
+    .addServer('https://dompell-server.onrender.com', 'Production')
     .addBearerAuth()
     .build();
 
