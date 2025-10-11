@@ -5,9 +5,16 @@ import {
 } from '@nestjs/common';
 import { OrganizationProfileDto } from 'src/organization/dto/create_update.dto';
 import { OrganizationRepository } from 'src/repository/organization.repository';
+import { S3Service } from 'src/s3-bucket/service/s3.service';
+
+type UploadedFile = Express.Multer.File;
 
 @Injectable()
 export class OrganizationService extends OrganizationRepository {
+  constructor(private s3Service: S3Service) {
+    super();
+  }
+
   public async getOrganizationProfile(id: string) {
     if (!id) {
       throw new BadRequestException(`User ID is required`);
@@ -41,6 +48,7 @@ export class OrganizationService extends OrganizationRepository {
   public async createOrUpdateOrganization(
     userId: string,
     data: OrganizationProfileDto,
+    logo?: UploadedFile,
   ) {
     if (!userId) {
       throw new BadRequestException(`User ID is required`);
@@ -51,6 +59,11 @@ export class OrganizationService extends OrganizationRepository {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
     userId = user.id;
+
+    if (logo) {
+      const logoUrl = await this.s3Service.uploadFile(logo);
+      data.logoUrl = logoUrl;
+    }
 
     return await this.createOrganization(userId, data);
   }
