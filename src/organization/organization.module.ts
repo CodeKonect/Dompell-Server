@@ -6,6 +6,7 @@ import { OrganizationController } from './controller/organization/organization.c
 import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { OrganizationRepository } from 'src/repository/organization.repository';
 import { JwtModule } from '@nestjs/jwt';
+import { UserRepository } from 'src/repository/user.repository';
 
 @Module({
   imports: [JwtModule],
@@ -14,6 +15,7 @@ import { JwtModule } from '@nestjs/jwt';
     ProgramsService,
     AuthGuard,
     OrganizationRepository,
+    UserRepository,
   ],
   controllers: [OrganizationController, ProgramsController],
 })
