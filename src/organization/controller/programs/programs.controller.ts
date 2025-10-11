@@ -38,7 +38,7 @@ import {
 export class ProgramsController {
   constructor(private ps: ProgramsService) {}
 
-  @Post('create')
+  @Post('create/:userId')
   @Roles(Role.ADMIN, Role.INSTITUTION)
   @HttpCode(201)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -82,7 +82,7 @@ export class ProgramsController {
     return await this.ps.createTrainingProgram(userId, data);
   }
 
-  @Get('new')
+  @Get('new/:userId')
   @HttpCode(200)
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'Fetched new training programs successfully')
@@ -112,7 +112,7 @@ export class ProgramsController {
     return await this.ps.getNewPrograms(userId);
   }
 
-  @Get('upcoming')
+  @Get('upcoming:userId')
   @HttpCode(200)
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'Fetched upcoming training programs successfully')
