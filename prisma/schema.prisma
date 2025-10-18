@@ -7,12 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// --- ENUMS ---
-
 enum Role {
   TRAINEE
   EMPLOYER
-  INSTITUTION // Renamed from ORGANIZATION to align with platform UI and new models
+  INSTITUTION
   ADMIN
 }
 
@@ -22,7 +20,6 @@ enum AccountStatus {
   REJECTED
 }
 
-// Renamed from InvitationStatus to be more specific to employers
 enum EmployerInvitationStatus {
   PENDING
   ACCEPTED
@@ -30,7 +27,6 @@ enum EmployerInvitationStatus {
   EXPIRED
 }
 
-// NEW: Status for institution program invitations
 enum ProgramInvitationStatus {
   PENDING
   ACCEPTED
@@ -38,7 +34,6 @@ enum ProgramInvitationStatus {
   EXPIRED
 }
 
-// NEW: Status for a trainee's enrollment in a program
 enum EnrollmentStatus {
   ACTIVE
   COMPLETED
@@ -53,8 +48,6 @@ enum AppointmentStatus {
   CANCELLED
 }
 
-// --- CORE MODELS ---
-
 model User {
   id                   String              @id @default(uuid())
   name                 String
@@ -66,7 +59,7 @@ model User {
   updatedAt            DateTime            @updatedAt
   traineeProfile       TraineeProfile?
   employerProfile      EmployerProfile?
-  institutionProfile   InstitutionProfile? // UPDATED: Renamed relation
+  institutionProfile   InstitutionProfile?
   appointmentsSent     Appointment[]       @relation("SentAppointments")
   appointmentsReceived Appointment[]       @relation("ReceivedAppointments")
   messagesSent         Message[]           @relation("SentMessages")
@@ -76,59 +69,54 @@ model User {
   @@index([accountStatus])
 }
 
-// --- PROFILE MODELS ---
-
 model TraineeProfile {
-  id                String             @id @default(uuid())
-  name              String
-  headline          String?
-  bio               String?            @db.Text
-  profilePictureUrl String?
-  cvUrl             String?
-  location          String?
-  isVerified        Boolean            @default(false) // This can be set by the Institution
-  profileComplete   Boolean?           @default(false)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String             @unique
+  id                String   @id @default(uuid())
+  headline          String
+  bio               String   @db.Text
+  profilePictureUrl String
+  cvUrl             String
+  location          String
+  isVerified        Boolean  @default(false)
+  profileComplete   Boolean? @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String   @unique
+
   educations        Education[]
   experiences       Experience[]
   certifications    Certification[]
   portfolioProjects PortfolioProject[]
   skills            Skill[]
 
-  // UPDATED: The relationship with an institution is now through Enrollment, not a direct link.
-  // This allows a trainee to be part of multiple programs/institutions over time.
   enrollments                 Enrollment[]
-  receivedEmployerInvitations EmployerInvitation[] // UPDATED: Renamed relation for clarity
-  receivedProgramInvitations  ProgramInvitation[] // NEW: Relation for program invites
+  receivedEmployerInvitations EmployerInvitation[]
+  receivedProgramInvitations  ProgramInvitation[]
 }
 
 model EmployerProfile {
-  id              String               @id @default(uuid())
-  name            String
-  industry        String?
-  description     String?              @db.Text
-  website         String?
-  logoUrl         String?
-  location        String?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId          String               @unique
-  // UPDATED: Renamed relation for clarity
+  id          String   @id @default(uuid())
+  name        String
+  industry    String?
+  description String?  @db.Text
+  website     String?
+  logoUrl     String?
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String   @unique
+
   sentInvitations EmployerInvitation[] @relation("CompanyInvitations")
 
   @@index([name])
   @@index([industry])
 }
 
-// REPLACED: Your old OrganizationProfile is replaced with this more detailed version
 model InstitutionProfile {
   id                   String              @id @default(uuid())
   institutionName      String
-  institutionType      String? // e.g., University, Vocational School
+  institutionType      String?
   description          String?             @db.Text
   missionVision        String?             @db.Text
   logoUrl              String?
@@ -146,9 +134,6 @@ model InstitutionProfile {
   @@index([institutionName])
 }
 
-// --- NEW INSTITUTION-FOCUSED MODELS ---
-
-// NEW: Represents a specific training program offered by an institution
 model TrainingProgram {
   id                       String              @id @default(uuid())
   title                    String
@@ -171,11 +156,10 @@ model TrainingProgram {
   @@index([institutionId])
 }
 
-// NEW: Manages invitations from an Institution for a Trainee to join a specific program
 model ProgramInvitation {
   id                String                  @id @default(uuid())
   status            ProgramInvitationStatus @default(PENDING)
-  traineeEmail      String // Invite by email
+  traineeEmail      String
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
   institution       InstitutionProfile      @relation(fields: [institutionId], references: [id], onDelete: Cascade)
@@ -189,7 +173,6 @@ model ProgramInvitation {
   @@index([institutionId, trainingProgramId])
 }
 
-// NEW: Represents a verified link between a trainee and a training program
 model Enrollment {
   id                String           @id @default(uuid())
   status            EnrollmentStatus @default(ACTIVE)
@@ -205,9 +188,6 @@ model Enrollment {
   @@index([trainingProgramId])
 }
 
-// --- EXISTING MODELS (with necessary updates) ---
-
-// UPDATED: Renamed to avoid confusion with the new ProgramInvitation model
 model EmployerInvitation {
   id              String                   @id @default(uuid())
   message         String                   @db.Text
@@ -225,7 +205,7 @@ model Education {
   id               String         @id @default(uuid())
   institutionName  String
   qualification    String
-  fieldOfStudy     String?
+  fieldOfStudy     String
   startDate        DateTime
   endDate          DateTime?
   description      String?        @db.Text
