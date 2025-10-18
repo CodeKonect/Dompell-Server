@@ -6,8 +6,7 @@ import {
 import { OrganizationProfileDto } from 'src/organization/dto/create_update.dto';
 import { OrganizationRepository } from 'src/repository/organization.repository';
 import { S3Service } from 'src/s3-bucket/service/s3.service';
-
-type UploadedFile = Express.Multer.File;
+import { UploadedFile } from 'src/utils/auth.utils';
 
 @Injectable()
 export class OrganizationService extends OrganizationRepository {
