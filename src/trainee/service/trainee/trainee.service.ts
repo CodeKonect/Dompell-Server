@@ -40,6 +40,45 @@ export class TraineeService extends TraineeRepository {
       data.profilePictureUrl = avatarUrl;
     }
 
-    return await this.createProfile(data, user);
+    return this.create(data, userId);
+  }
+
+  public async getProfile(id: string) {
+    if (!id) {
+      throw new BadRequestException(`Trainee Profile ID is required`);
+    }
+
+    const profile = await this.findByID(id);
+    if (!profile) {
+      throw new NotFoundException('Trainee Profile not found');
+    }
+
+    return profile;
+  }
+
+  public async getProfileByUserId(userId: string) {
+    if (!userId) {
+      throw new BadRequestException(`User ID is required`);
+    }
+
+    const profile = await this.findByUserID(userId);
+    if (!profile) {
+      throw new NotFoundException('Trainee Profile not found');
+    }
+
+    return profile;
+  }
+
+  public async deleteProfile(id: string) {
+    if (!id) {
+      throw new BadRequestException(`Organization ID is required`);
+    }
+
+    const profile = await this.findByID(id);
+    if (!profile) {
+      throw new NotFoundException(`Trainee Profile ID not found`);
+    }
+
+    return await this.delete(id);
   }
 }
