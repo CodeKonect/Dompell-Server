@@ -3,10 +3,20 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { TraineeRepository } from 'src/repository/trainee.repository';
+import {
+  traineeProfileInclude,
+  TraineeRepository,
+} from 'src/repository/trainee.repository';
 import { S3Service } from 'src/s3-bucket/service/s3.service';
 import { CreateTraineeProfileDto } from 'src/trainee/dto/trainee.dto';
 import { UploadedFile } from 'src/utils/auth.utils';
+
+export interface TraineeQuery {
+  search?: string;
+  skill?: string;
+  page?: number;
+  limit?: number;
+}
 
 @Injectable()
 export class TraineeService extends TraineeRepository {
@@ -80,5 +90,67 @@ export class TraineeService extends TraineeRepository {
     }
 
     return await this.delete(id);
+  }
+
+  public async getAllTraineeProfiles(query: TraineeQuery) {
+    const { search = '', skill = '', page = 1, limit = 10 } = query;
+
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+    const skip = (pageNum - 1) * limitNum;
+    const where: { AND?: any[] } = {};
+
+    if (search.trim()) {
+      if (!where.AND) where.AND = [];
+      where.AND.push({
+        OR: [
+          { location: { contains: search, mode: 'insensitive' } },
+          { headline: { contains: search, mode: 'insensitive' } },
+        ],
+      });
+    }
+
+    if (skill) {
+      if (!where.AND) where.AND = [];
+      where.AND.push({
+        skills: {
+          some: { name: { equals: skill, mode: 'insensitive' } },
+        },
+      });
+    }
+
+    if (where.AND && where.AND.length === 0) {
+      delete where.AND;
+    }
+
+    const [total, trainees] = await this.$transaction([
+      this.traineeProfile.count({ where }),
+      this.traineeProfile.findMany({
+        where,
+        skip,
+        take: limitNum,
+        orderBy: { createdAt: 'desc' },
+        include: traineeProfileInclude,
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limitNum);
+    const hasNextPage = pageNum < totalPages;
+    const hasPrevPage = pageNum > 1;
+
+    if (!trainees || total === 0) {
+      return { total: 0, users: [] };
+    }
+
+    return {
+      total,
+      trainees,
+      pagination: {
+        currentPage: pageNum,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+      },
+    };
   }
 }
