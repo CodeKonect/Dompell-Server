@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { DbConnectService } from 'src/db/db-connect.service';
+import { CreateTraineeProfileDto } from 'src/trainee/dto/trainee.dto';
 
 export const traineeProfileInclude =
   Prisma.validator<Prisma.TraineeProfileInclude>()({
@@ -30,23 +31,38 @@ export class TraineeRepository extends DbConnectService {
   }
 
   public async findByUserID(userId: string) {
-    return this.traineeProfile.findUnique({
+    const trainee = await this.traineeProfile.findUnique({
       where: { userId },
       include: traineeProfileInclude,
     });
+
+    return trainee;
   }
 
-  public async create(data: Prisma.TraineeProfileCreateInput) {
-    return this.traineeProfile.create({
-      data,
+  public async create(data: CreateTraineeProfileDto, userId: string) {
+    const upsertProfile = await this.traineeProfile.upsert({
+      where: { userId },
+      update: {
+        headline: data.headline,
+        bio: data.bio,
+        profilePictureUrl: data.profilePictureUrl,
+        cvUrl: data.cvUrl,
+        location: data.location,
+      },
+      create: {
+        headline: data.headline,
+        bio: data.bio,
+        profilePictureUrl: data.profilePictureUrl,
+        cvUrl: data.cvUrl,
+        location: data.location,
+        user: {
+          connect: { id: userId },
+        },
+      },
+      include: traineeProfileInclude,
     });
-  }
 
-  public async update(id: string, data: Prisma.TraineeProfileUpdateInput) {
-    return this.traineeProfile.update({
-      where: { id },
-      data,
-    });
+    return upsertProfile;
   }
 
   public async updateProfileCompletion(id: string, isComplete: boolean) {
