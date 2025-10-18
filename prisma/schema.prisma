@@ -87,7 +87,7 @@ model TraineeProfile {
   experiences       Experience[]
   certifications    Certification[]
   portfolioProjects PortfolioProject[]
-  skills            Skill[]
+  skills            Skills[]
 
   enrollments                 Enrollment[]
   receivedEmployerInvitations EmployerInvitation[]
@@ -249,7 +249,7 @@ model PortfolioProject {
   traineeProfileId String
 }
 
-model Skill {
+model Skills {
   id   String @id @default(uuid())
   name String @unique
 
