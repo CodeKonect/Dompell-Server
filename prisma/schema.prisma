@@ -80,8 +80,7 @@ model User {
 
 model TraineeProfile {
   id                String             @id @default(uuid())
-  firstName         String
-  lastName          String
+  name              String
   headline          String?
   bio               String?            @db.Text
   profilePictureUrl String?
