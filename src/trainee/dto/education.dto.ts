@@ -1,11 +1,7 @@
-import { IsString, IsOptional, IsDateString, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsDateString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateEducationDto {
-  @ApiProperty()
-  @IsUUID()
-  traineeProfileId: string; // Used by the service for validation
-
   @ApiProperty()
   @IsString()
   institutionName: string;
@@ -14,10 +10,9 @@ export class CreateEducationDto {
   @IsString()
   qualification: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
   @IsString()
-  fieldOfStudy?: string;
+  fieldOfStudy: string;
 
   @ApiProperty({ type: 'string', format: 'date' })
   @IsDateString()
@@ -27,11 +22,6 @@ export class CreateEducationDto {
   @IsOptional()
   @IsDateString()
   endDate?: Date;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  description?: string;
 }
 
 export class UpdateEducationDto {

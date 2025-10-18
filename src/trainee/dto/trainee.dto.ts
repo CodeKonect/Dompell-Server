@@ -1,47 +1,29 @@
-import { IsString, IsOptional, IsUUID, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsUrl } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateTraineeProfileDto {
-  @ApiProperty({ description: 'The user ID this profile belongs to.' })
-  @IsUUID()
-  userId: string;
-
-  @ApiProperty({ description: 'The full name of the trainee.' })
+  @ApiProperty({ description: 'A short professional summary.' })
   @IsString()
-  name: string;
+  headline: string;
 
-  @ApiPropertyOptional({ description: 'A short professional summary.' })
-  @IsOptional()
+  @ApiProperty({ description: 'Detailed biography.' })
   @IsString()
-  headline?: string;
+  bio: string;
 
-  @ApiPropertyOptional({ description: 'Detailed biography.' })
-  @IsOptional()
-  @IsString()
-  bio?: string;
-
-  @ApiPropertyOptional({ description: 'URL to the profile picture.' })
-  @IsOptional()
+  @ApiProperty({ description: 'URL to the profile picture.' })
   @IsUrl()
-  profilePictureUrl?: string;
+  profilePictureUrl: string;
 
-  @ApiPropertyOptional({ description: 'URL to the trainee’s CV/Resume.' })
-  @IsOptional()
+  @ApiProperty({ description: "URL to the trainee's CV/Resume." })
   @IsUrl()
-  cvUrl?: string;
+  cvUrl: string;
 
-  @ApiPropertyOptional({ description: 'The current location of the trainee.' })
-  @IsOptional()
+  @ApiProperty({ description: 'The current location of the trainee.' })
   @IsString()
-  location?: string;
+  location: string;
 }
 
 export class UpdateTraineeProfileDto {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  name?: string;
-
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
