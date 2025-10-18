@@ -13,6 +13,7 @@ import {
   UsePipes,
   ValidationPipe,
   UploadedFiles,
+  Query,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
@@ -34,7 +35,10 @@ import {
   accessDeniedResponse,
 } from 'src/swagger/users.swagger';
 import { CreateTraineeProfileDto } from 'src/trainee/dto/trainee.dto';
-import { TraineeService } from 'src/trainee/service/trainee/trainee.service';
+import {
+  TraineeQuery,
+  TraineeService,
+} from 'src/trainee/service/trainee/trainee.service';
 
 @ApiTags('Trainee Profile')
 @UseGuards(AuthGuard, RolesGuard)
@@ -193,5 +197,29 @@ export class TraineeController {
   })
   async deleteTraineeProfile(@Param('id', ParseUUIDPipe) id: string) {
     return await this.ts.deleteProfile(id);
+  }
+
+  @Get('')
+  @Roles(Role.ADMIN, Role.INSTITUTION, Role.EMPLOYER)
+  @HttpCode(200)
+  @UseInterceptors(DataMessageInterceptor)
+  @SetMetadata('message', 'Trainees fetched successfully')
+  @ApiOperation({ summary: 'Get all trainees' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    example: unauthorizedResponse,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+    example: accessDeniedResponse,
+  })
+  async getAllTrainees(@Query() query: TraineeQuery) {
+    return await this.ts.getAllTraineeProfiles(query);
   }
 }
