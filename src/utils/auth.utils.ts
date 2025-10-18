@@ -58,3 +58,5 @@ export const generateToken = (
     { expiresIn: tokenDuration, secret: secret },
   );
 };
+
+export type UploadedFile = Express.Multer.File;
