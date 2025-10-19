@@ -36,6 +36,8 @@ export class EducationService extends EducationRepository {
     if (!education) {
       throw new NotFoundException('No education found for this trainee');
     }
+
+    return education;
   }
 
   public async createEducation(
