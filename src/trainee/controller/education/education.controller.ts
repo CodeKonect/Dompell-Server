@@ -201,7 +201,10 @@ export class EducationController {
       message: 'Trainee profile not found',
     },
   })
-  async deleteEducation(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.eds.deleteEducation(id);
+  async deleteEducation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { traineeProfileId: string },
+  ) {
+    return await this.eds.deleteEducation(id, body.traineeProfileId);
   }
 }
