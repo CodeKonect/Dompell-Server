@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -70,7 +71,7 @@ export class EducationService extends EducationRepository {
     return await this.update(id, data);
   }
 
-  public async deleteEducation(id: string) {
+  public async deleteEducation(id: string, traineeProfileId: string) {
     if (!id) {
       throw new BadRequestException('Education Id is required');
     }
@@ -78,6 +79,12 @@ export class EducationService extends EducationRepository {
     const education = await this.findOne(id);
     if (!education) {
       throw new NotFoundException('Education not found');
+    }
+
+    if (education.traineeProfileId !== traineeProfileId) {
+      throw new ForbiddenException(
+        'Access denied. This experience record does not belong to your profile.',
+      );
     }
 
     return await this.delete(id);
