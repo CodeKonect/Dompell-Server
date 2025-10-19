@@ -14,6 +14,7 @@ import {
   ValidationPipe,
   UploadedFiles,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
@@ -39,6 +40,7 @@ import {
   TraineeQuery,
   TraineeService,
 } from 'src/trainee/service/trainee/trainee.service';
+import { AddSkillDto, UpdateSkillsDto } from '../../dto/skills.dto';
 
 @ApiTags('Trainee Profile')
 @UseGuards(AuthGuard, RolesGuard)
@@ -221,5 +223,101 @@ export class TraineeController {
   })
   async getAllTrainees(@Query() query: TraineeQuery) {
     return await this.ts.getAllTraineeProfiles(query);
+  }
+
+  @Post('skill/:traineeProfileId')
+  @Roles(Role.TRAINEE)
+  @HttpCode(201)
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  @UseInterceptors(DataMessageInterceptor)
+  @SetMetadata('message', 'Skill added successfully')
+  @ApiOperation({ summary: 'Add a trainee skill' })
+  @ApiBody({
+    description: 'Trainee skill profile data',
+    type: AddSkillDto,
+  })
+  @ApiResponse({ status: 201, description: 'Success' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    example: unauthorizedResponse,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+    example: accessDeniedResponse,
+  })
+  async addSkill(
+    @Param('traineeProfileId', ParseUUIDPipe) traineeProfileId: string,
+    @Body() data: AddSkillDto,
+  ) {
+    return await this.ts.addSkill(traineeProfileId, data);
+  }
+
+  @Patch(':id')
+  @Roles(Role.TRAINEE)
+  @HttpCode(200)
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  @UseInterceptors(DataMessageInterceptor)
+  @SetMetadata('message', 'Skill updated successfully')
+  @ApiOperation({ summary: 'Update a trainee skill profile' })
+  @ApiBody({
+    description: 'Trainee skill data',
+    type: UpdateSkillsDto,
+  })
+  @ApiResponse({ status: 201, description: 'Success' })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    example: unauthorizedResponse,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+    example: accessDeniedResponse,
+  })
+  async updateSkill(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() data: UpdateSkillsDto,
+  ) {
+    return await this.ts.updateSkill(id, data);
+  }
+
+  @Delete(':skillId:traineeProfileId')
+  @Roles(Role.TRAINEE)
+  @HttpCode(200)
+  @UseInterceptors(MessageInterceptor)
+  @SetMetadata('message', 'Deleted skill successfully')
+  @ApiOperation({
+    summary: 'Delete a trainee skill',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+    example: unauthorizedResponse,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+    example: accessDeniedResponse,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+    example: {
+      message: 'Trainee profile not found',
+    },
+  })
+  async deleteSkill(
+    @Param('skillId', ParseUUIDPipe) skillId: string,
+    @Param('traineeProfileId', ParseUUIDPipe) traineeProfileId: string,
+  ) {
+    return await this.ts.deleteSkill(skillId, traineeProfileId);
   }
 }
