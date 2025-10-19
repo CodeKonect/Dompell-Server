@@ -11,6 +11,7 @@ import { TraineeRepository } from 'src/repository/trainee.repository';
 import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { UserRepository } from 'src/repository/user.repository';
+import { EducationController } from './controller/education/education.controller';
 
 @Module({
   imports: [JwtModule],
@@ -25,6 +26,6 @@ import { UserRepository } from 'src/repository/user.repository';
     AuthGuard,
     UserRepository,
   ],
-  controllers: [TraineeController, SkillsController],
+  controllers: [TraineeController, SkillsController, EducationController],
 })
 export class TraineeModule {}
