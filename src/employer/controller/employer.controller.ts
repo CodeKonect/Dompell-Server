@@ -105,7 +105,7 @@ export class EmployerController {
     summary: 'Get an employer',
   })
   @ApiResponse({
-    status: 200,employer
+    status: 200,
     description: 'Success',
   })
   @ApiResponse({
