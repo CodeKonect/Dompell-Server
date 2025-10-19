@@ -10,6 +10,7 @@ import {
 import { S3Service } from 'src/s3-bucket/service/s3.service';
 import { CreateTraineeProfileDto } from 'src/trainee/dto/trainee.dto';
 import { UploadedFile } from 'src/utils/auth.utils';
+import { AddSkillDto, UpdateSkillsDto } from '../../dto/skills.dto';
 
 export interface TraineeQuery {
   search?: string;
@@ -150,5 +151,71 @@ export class TraineeService extends TraineeRepository {
         hasPrevPage,
       },
     };
+  }
+
+  public async addSkill(traineeProfileId: string, data: AddSkillDto) {
+    if (!traineeProfileId) {
+      throw new BadRequestException(`Trainee Profile ID is required`);
+    }
+
+    await this.getProfile(traineeProfileId);
+
+    let skill = await this.skills.findUnique({
+      where: { name: data.name },
+    });
+
+    if (!skill) {
+      skill = await this.skills.create({
+        data: {
+          name: data.name,
+          trainees: {
+            connect: { id: traineeProfileId },
+          },
+        },
+      });
+    }
+
+    return skill;
+  }
+
+  public async updateSkill(id: string, data: UpdateSkillsDto) {
+    if (!id) {
+      throw new BadRequestException(`Skill ID is required`);
+    }
+
+    const skill = await this.skills.findUnique({
+      where: { id: id },
+    });
+    if (!skill) {
+      throw new NotFoundException(`Skill ID is required`);
+    }
+
+    return this.skills.update({
+      where: { id },
+      data: {
+        name: data.name,
+      },
+    });
+  }
+
+  public async deleteSkill(skillId: string, traineeProfileId: string) {
+    if (!skillId) {
+      throw new BadRequestException(`Skill ID is required`);
+    }
+
+    if (!traineeProfileId) {
+      throw new BadRequestException(`Trainee Profile ID is required`);
+    }
+
+    await this.getProfile(traineeProfileId);
+
+    return this.traineeProfile.update({
+      where: { id: traineeProfileId },
+      data: {
+        skills: {
+          disconnect: { id: skillId },
+        },
+      },
+    });
   }
 }
