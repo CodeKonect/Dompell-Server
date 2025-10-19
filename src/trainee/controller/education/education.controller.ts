@@ -6,6 +6,7 @@ import {
   HttpCode,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   SetMetadata,
   UseGuards,
@@ -141,9 +142,9 @@ export class EducationController {
     return await this.eds.getById(id);
   }
 
-  @Post(':id')
+  @Patch(':id')
   @Roles(Role.TRAINEE)
-  @HttpCode(201)
+  @HttpCode(200)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'Education updated successfully')
@@ -172,7 +173,7 @@ export class EducationController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.INSTITUTION)
+  @Roles(Role.TRAINEE)
   @HttpCode(200)
   @UseInterceptors(MessageInterceptor)
   @SetMetadata('message', 'Deleted trainee education successfully')
