@@ -37,6 +37,7 @@ import {
   CreatePortfolioDto,
   UpdatePortfolioDto,
 } from '../../dto/portfolio.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Trainee Portfolio')
 @UseGuards(AuthGuard, RolesGuard)
@@ -117,7 +118,13 @@ export class PortfolioController {
   @Roles(Role.TRAINEE)
   @HttpCode(201)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  @UseInterceptors(DataMessageInterceptor)
+  @UseInterceptors(
+    DataMessageInterceptor,
+    FileFieldsInterceptor([
+      { name: 'projectLink', maxCount: 1 },
+      { name: 'image', maxCount: 1 },
+    ]),
+  )
   @SetMetadata('message', 'Certification added successfully')
   @ApiOperation({ summary: 'Create a trainee certification profile' })
   @ApiBody({
