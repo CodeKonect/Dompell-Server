@@ -12,7 +12,7 @@ import {
 } from '../../dto/certification.dto';
 
 @Injectable()
-export class CertificationsService extends CertificationRepository{
+export class CertificationsService extends CertificationRepository {
   constructor(private tr: TraineeRepository) {
     super();
   }
