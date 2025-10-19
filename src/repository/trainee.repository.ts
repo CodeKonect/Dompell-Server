@@ -22,25 +22,21 @@ export const traineeProfileInclude =
 
 export class TraineeRepository extends DbConnectService {
   public async findByID(id: string) {
-    const trainee = await this.traineeProfile.findUnique({
+    return this.traineeProfile.findUnique ({
       where: { id },
       include: traineeProfileInclude,
     });
-
-    return trainee;
   }
 
   public async findByUserID(userId: string) {
-    const trainee = await this.traineeProfile.findUnique({
+    return this.traineeProfile.findUnique ({
       where: { userId },
       include: traineeProfileInclude,
     });
-
-    return trainee;
   }
 
   public async create(data: CreateTraineeProfileDto, userId: string) {
-    const upsertProfile = await this.traineeProfile.upsert({
+    return this.traineeProfile.upsert ({
       where: { userId },
       update: {
         headline: data.headline,
@@ -61,8 +57,6 @@ export class TraineeRepository extends DbConnectService {
       },
       include: traineeProfileInclude,
     });
-
-    return upsertProfile;
   }
 
   public async updateProfileCompletion(id: string, isComplete: boolean) {
