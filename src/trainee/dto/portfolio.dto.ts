@@ -16,7 +16,7 @@ export class CreatePortfolioDto {
 
   @ApiProperty()
   @IsUrl()
-  imageUrl: Date;
+  imageUrl: string;
 }
 
 export class UpdatePortfolioDto {
@@ -38,5 +38,5 @@ export class UpdatePortfolioDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsUrl()
-  imageUrl?: Date;
+  imageUrl?: string;
 }
