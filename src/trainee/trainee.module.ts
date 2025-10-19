@@ -10,6 +10,9 @@ import { AuthGuard } from 'src/guards/auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { UserRepository } from 'src/repository/user.repository';
 import { EducationController } from './controller/education/education.controller';
+import { ExperienceController } from './controller/experience/experience.controller';
+import { CertificationsService } from './service/certifications/certifications.service';
+import { CertificationsController } from './controller/certifications/certifications.controller';
 
 @Module({
   imports: [JwtModule],
@@ -22,7 +25,8 @@ import { EducationController } from './controller/education/education.controller
     TraineeRepository,
     AuthGuard,
     UserRepository,
+    CertificationsService,
   ],
-  controllers: [TraineeController, EducationController],
+  controllers: [TraineeController, EducationController, ExperienceController, CertificationsController],
 })
 export class TraineeModule {}
