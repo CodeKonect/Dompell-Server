@@ -41,13 +41,11 @@ export class TraineeService extends TraineeRepository {
     userId = user.id;
 
     if (cv) {
-      const cvUrl = await this.s3Service.uploadFile(cv);
-      data.cvUrl = cvUrl;
+      data.cvUrl = await this.s3Service.uploadFile(cv);
     }
 
     if (avatar) {
-      const avatarUrl = await this.s3Service.uploadFile(avatar);
-      data.profilePictureUrl = avatarUrl;
+      data.profilePictureUrl = await this.s3Service.uploadFile(avatar);
     }
 
     return this.create(data, userId);
