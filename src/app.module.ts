@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { S3BucketModule } from './s3-bucket/s3-bucket.module';
 import { OrganizationModule } from './organization/organization.module';
 import { TraineeModule } from './trainee/trainee.module';
+import { EmployerModule } from './employer/employer.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { TraineeModule } from './trainee/trainee.module';
     S3BucketModule,
     OrganizationModule,
     TraineeModule,
+    EmployerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
