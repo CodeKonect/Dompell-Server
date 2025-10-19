@@ -5,7 +5,7 @@ import {
 } from '../trainee/dto/experience.dto';
 
 export class ExperienceRepository extends DbConnectService {
-  public findOne(id: string) {
+  public async findById(id: string) {
     return this.experience.findUnique({
       where: { id },
       include: {
@@ -14,7 +14,7 @@ export class ExperienceRepository extends DbConnectService {
     });
   }
 
-  public create(data: CreateExperienceDto, traineeProfileId: string) {
+  public async create(data: CreateExperienceDto, traineeProfileId: string) {
     return this.experience.create({
       data: {
         ...data,
@@ -25,7 +25,7 @@ export class ExperienceRepository extends DbConnectService {
     });
   }
 
-  public update(id: string, data: UpdateExperienceDto) {
+  public async update(id: string, data: UpdateExperienceDto) {
     return this.experience.update({
       where: { id },
       data: {
@@ -34,7 +34,7 @@ export class ExperienceRepository extends DbConnectService {
     });
   }
 
-  public findByTraineeProfileId(traineeProfileId: string) {
+  public async findByTraineeId(traineeProfileId: string) {
     return this.education.findMany({
       where: { traineeProfileId },
       orderBy: { startDate: 'desc' },
