@@ -22,21 +22,21 @@ export const traineeProfileInclude =
 
 export class TraineeRepository extends DbConnectService {
   public async findByID(id: string) {
-    return this.traineeProfile.findUnique ({
+    return this.traineeProfile.findUnique({
       where: { id },
       include: traineeProfileInclude,
     });
   }
 
   public async findByUserID(userId: string) {
-    return this.traineeProfile.findUnique ({
+    return this.traineeProfile.findUnique({
       where: { userId },
       include: traineeProfileInclude,
     });
   }
 
   public async create(data: CreateTraineeProfileDto, userId: string) {
-    return this.traineeProfile.upsert ({
+    return this.traineeProfile.upsert({
       where: { userId },
       update: {
         headline: data.headline,
