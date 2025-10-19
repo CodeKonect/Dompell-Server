@@ -25,18 +25,11 @@ export class EducationRepository extends DbConnectService {
     });
   }
 
-  public async update(
-    id: string,
-    data: UpdateEducationDto,
-    traineeProfileId: string,
-  ) {
+  public async update(id: string, data: UpdateEducationDto) {
     return this.education.update({
       where: { id },
       data: {
         ...data,
-        traineeProfile: {
-          connect: { id: traineeProfileId },
-        },
       },
     });
   }
