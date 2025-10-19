@@ -285,7 +285,7 @@ export class TraineeController {
     return await this.ts.updateSkill(id, data);
   }
 
-  @Delete(':traineeProfileId/skill/:skillId')
+  @Delete('skill/:skillId/:traineeProfileId')
   @Roles(Role.TRAINEE)
   @HttpCode(200)
   @UseInterceptors(MessageInterceptor)
