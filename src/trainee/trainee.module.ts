@@ -13,6 +13,7 @@ import { EducationController } from './controller/education/education.controller
 import { ExperienceController } from './controller/experience/experience.controller';
 import { CertificationsService } from './service/certifications/certifications.service';
 import { CertificationsController } from './controller/certifications/certifications.controller';
+import { PortfolioController } from './controller/portfolio/portfolio.controller';
 
 @Module({
   imports: [JwtModule],
@@ -27,6 +28,12 @@ import { CertificationsController } from './controller/certifications/certificat
     UserRepository,
     CertificationsService,
   ],
-  controllers: [TraineeController, EducationController, ExperienceController, CertificationsController],
+  controllers: [
+    TraineeController,
+    EducationController,
+    ExperienceController,
+    CertificationsController,
+    PortfolioController,
+  ],
 })
 export class TraineeModule {}
