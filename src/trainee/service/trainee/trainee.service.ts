@@ -48,7 +48,7 @@ export class TraineeService extends TraineeRepository {
       data.profilePictureUrl = await this.s3Service.uploadFile(avatar);
     }
 
-    return this.create(data, userId);
+    return await this.create(data, userId);
   }
 
   public async getProfile(id: string) {
