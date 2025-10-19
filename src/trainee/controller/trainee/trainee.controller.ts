@@ -255,7 +255,7 @@ export class TraineeController {
     return await this.ts.addSkill(traineeProfileId, data);
   }
 
-  @Patch(':id')
+  @Patch('skill/:id')
   @Roles(Role.TRAINEE)
   @HttpCode(200)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
@@ -285,7 +285,7 @@ export class TraineeController {
     return await this.ts.updateSkill(id, data);
   }
 
-  @Delete(':skillId:traineeProfileId')
+  @Delete(':traineeProfileId/skill/:skillId')
   @Roles(Role.TRAINEE)
   @HttpCode(200)
   @UseInterceptors(MessageInterceptor)
