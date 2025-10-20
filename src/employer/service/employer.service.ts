@@ -62,7 +62,7 @@ export class EmployerService extends EmployerRepository {
   }
 
   public async getAllEmployers() {
-    return this.getAll ();
+    return this.getAll();
   }
 
   public async deleteEmployerProfile(id: string) {
