@@ -46,7 +46,7 @@ export class EmployerController {
   constructor(private readonly es: EmployerService) {}
 
   @Post('create/:userId')
-  @Roles(Role.TRAINEE)
+  @Roles(Role.EMPLOYER)
   @HttpCode(201)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(DataMessageInterceptor, FileInterceptor('logo'))
@@ -130,7 +130,7 @@ export class EmployerController {
   }
 
   @Get(':userId')
-  @Roles(Role.ADMIN, Role.EMPLOYER)
+  @Roles(Role.ADMIN, Role.INSTITUTION, Role.TRAINEE, Role.EMPLOYER)
   @HttpCode(200)
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'Fetched employer successfully')
@@ -163,7 +163,7 @@ export class EmployerController {
   }
 
   @Get()
-  @Roles(Role.ADMIN, Role.INSTITUTION, Role.TRAINEE, Role.EMPLOYER)
+  @Roles(Role.ADMIN, Role.INSTITUTION, Role.EMPLOYER)
   @HttpCode(200)
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'Fetched employers successfully')
