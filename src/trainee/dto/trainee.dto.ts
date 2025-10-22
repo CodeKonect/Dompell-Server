@@ -10,13 +10,15 @@ export class CreateTraineeProfileDto {
   @IsString()
   bio: string;
 
-  @ApiProperty({ description: 'URL to the profile picture.' })
-  @IsUrl()
-  profilePictureUrl: string;
+  @ApiPropertyOptional({ description: 'URL to the profile picture.' })
+  @IsOptional()
+  @IsString()
+  profilePictureUrl?: string;
 
-  @ApiProperty({ description: "URL to the trainee's CV/Resume." })
-  @IsUrl()
-  cvUrl: string;
+  @ApiPropertyOptional({ description: "URL to the trainee's CV/Resume." })
+  @IsOptional()
+  @IsString()
+  cvUrl?: string;
 
   @ApiProperty({ description: 'The current location of the trainee.' })
   @IsString()

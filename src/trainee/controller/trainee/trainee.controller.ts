@@ -70,7 +70,6 @@ export class TraineeController {
       properties: {
         headline: { type: 'string' },
         bio: { type: 'string' },
-        profilePictureUrl: { type: 'string' },
         location: { type: 'string' },
         cv: { type: 'string', format: 'binary' },
         avatar: { type: 'string', format: 'binary' },
@@ -91,13 +90,13 @@ export class TraineeController {
   })
   async createTraineeProfile(
     @Param('userId', ParseUUIDPipe) userId: string,
-    @Body() data: CreateTraineeProfileDto,
     @UploadedFiles()
     files: { cv?: Express.Multer.File[]; avatar?: Express.Multer.File[] },
+    @Body() data: CreateTraineeProfileDto,
   ) {
-    const cv = files.cv?.[0];
-    const avatar = files.avatar?.[0];
-    return await this.ts.createProfile(data, userId, cv, avatar);
+    if (files?.cv?.[0]) data.cvUrl = files.cv[0].path;
+    if (files?.avatar?.[0]) data.profilePictureUrl = files.avatar[0].path;
+    return await this.ts.createProfile(userId, data);
   }
 
   @Get(':id')

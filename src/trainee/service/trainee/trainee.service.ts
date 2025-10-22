@@ -26,8 +26,8 @@ export class TraineeService extends TraineeRepository {
   }
 
   public async createProfile(
-    data: CreateTraineeProfileDto,
     userId: string,
+    data: CreateTraineeProfileDto,
     cv?: UploadedFile,
     avatar?: UploadedFile,
   ) {
@@ -49,7 +49,7 @@ export class TraineeService extends TraineeRepository {
       data.profilePictureUrl = await this.s3Service.uploadFile(avatar);
     }
 
-    return await this.create(data, userId);
+    return await this.create(userId, data);
   }
 
   public async getProfile(id: string) {

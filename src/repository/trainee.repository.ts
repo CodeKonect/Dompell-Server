@@ -35,7 +35,7 @@ export class TraineeRepository extends DbConnectService {
     });
   }
 
-  public async create(data: CreateTraineeProfileDto, userId: string) {
+  public async create(userId: string, data: CreateTraineeProfileDto) {
     return this.traineeProfile.upsert({
       where: { userId },
       update: {

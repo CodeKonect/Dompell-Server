@@ -171,7 +171,7 @@ export class EmployerController {
     summary: 'Get all employers',
   })
   @ApiResponse({
-    status: 200,
+    status: 200,git
     description: 'Success',
   })
   @ApiResponse({

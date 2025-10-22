@@ -73,8 +73,8 @@ model TraineeProfile {
   id                String   @id @default(uuid())
   headline          String
   bio               String   @db.Text
-  profilePictureUrl String
-  cvUrl             String
+  profilePictureUrl String?
+  cvUrl             String?
   location          String
   isVerified        Boolean  @default(false)
   profileComplete   Boolean? @default(false)
