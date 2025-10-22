@@ -15,8 +15,9 @@ export class CreatePortfolioDto {
   projectUrl: string;
 
   @ApiProperty()
-  @IsUrl()
-  imageUrl: string;
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }
 
 export class UpdatePortfolioDto {

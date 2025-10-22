@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   SetMetadata,
+  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -18,6 +19,7 @@ import {
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -37,7 +39,7 @@ import {
   CreatePortfolioDto,
   UpdatePortfolioDto,
 } from '../../dto/portfolio.dto';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Trainee Portfolio')
 @UseGuards(AuthGuard, RolesGuard)
@@ -118,18 +120,21 @@ export class PortfolioController {
   @Roles(Role.TRAINEE)
   @HttpCode(201)
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  @UseInterceptors(
-    DataMessageInterceptor,
-    FileFieldsInterceptor([
-      { name: 'projectLink', maxCount: 1 },
-      { name: 'image', maxCount: 1 },
-    ]),
-  )
-  @SetMetadata('message', 'Certification added successfully')
-  @ApiOperation({ summary: 'Create a trainee certification profile' })
+  @UseInterceptors(DataMessageInterceptor, FileInterceptor('image'))
+  @SetMetadata('message', 'Portfolio project added successfully')
+  @ApiOperation({ summary: 'Create a trainee Portfolio project profile' })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Trainee portfolio project data',
-    type: CreatePortfolioDto,
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        description: { type: 'string' },
+        projectUrl: { type: 'string' },
+        image: { type: 'string', format: 'binary' },
+      },
+    },
   })
   @ApiResponse({ status: 201, description: 'Success' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
@@ -146,21 +151,10 @@ export class PortfolioController {
   async addPortfolio(
     @Param('traineeProfileId', ParseUUIDPipe) traineeProfileId: string,
     @Body() data: CreatePortfolioDto,
-    @UploadedFiles()
-    files: {
-      projectLink?: Express.Multer.File[];
-      image?: Express.Multer.File[];
-    },
+    @UploadedFile()
+    image?: Express.Multer.File,
   ) {
-    const projectLink = files.projectLink?.[0];
-    const image = files.image?.[0];
-
-    return await this.ps.addPortfolio(
-      data,
-      traineeProfileId,
-      projectLink,
-      image,
-    );
+    return await this.ps.addPortfolio(data, traineeProfileId, image);
   }
 
   @Patch(':id')

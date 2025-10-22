@@ -82,7 +82,13 @@ export class EducationController {
   @Post('create/:traineeProfileId')
   @Roles(Role.TRAINEE)
   @HttpCode(201)
-  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  )
   @UseInterceptors(DataMessageInterceptor)
   @SetMetadata('message', 'Education added successfully')
   @ApiOperation({ summary: 'Create a trainee education profile' })

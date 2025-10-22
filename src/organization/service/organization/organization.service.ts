@@ -60,8 +60,7 @@ export class OrganizationService extends OrganizationRepository {
     userId = user.id;
 
     if (logo) {
-      const logoUrl = await this.s3Service.uploadFile(logo);
-      data.logoUrl = logoUrl;
+      data.logoUrl = await this.s3Service.uploadFile(logo);
     }
 
     return await this.createOrganization(userId, data);

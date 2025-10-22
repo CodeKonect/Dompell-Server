@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsDate } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateEducationDto {
   @ApiProperty()
@@ -15,12 +16,14 @@ export class CreateEducationDto {
   fieldOfStudy: string;
 
   @ApiProperty({ type: 'string', format: 'date' })
-  @IsDateString()
+  @Type(() => Date)
+  @IsDate()
   startDate: Date;
 
   @ApiPropertyOptional({ type: 'string', format: 'date' })
   @IsOptional()
-  @IsDateString()
+  @Type(() => Date)
+  @IsDate()
   endDate?: Date;
 }
 

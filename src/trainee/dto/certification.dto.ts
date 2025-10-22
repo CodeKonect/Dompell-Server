@@ -1,5 +1,12 @@
-import { IsString, IsOptional, IsDateString, IsUrl } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsDateString,
+  IsUrl,
+  IsDate,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateCertificationDto {
   @ApiProperty()
@@ -15,7 +22,8 @@ export class CreateCertificationDto {
   credentialUrl: string;
 
   @ApiProperty({ type: 'string', format: 'date' })
-  @IsDateString()
+  @Type(() => Date)
+  @IsDate()
   issueDate: Date;
 }
 

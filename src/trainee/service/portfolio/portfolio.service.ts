@@ -54,7 +54,6 @@ export class PortfolioService extends PortfolioRepository {
   public async addPortfolio(
     data: CreatePortfolioDto,
     traineeProfileId: string,
-    projectLink?: UploadedFile,
     image?: UploadedFile,
   ) {
     if (!traineeProfileId) {
@@ -66,10 +65,6 @@ export class PortfolioService extends PortfolioRepository {
       throw new NotFoundException('Trainee profile not found');
     }
     traineeProfileId = trainee.id;
-
-    if (projectLink) {
-      data.projectUrl = await this.s3Service.uploadFile(projectLink);
-    }
 
     if (image) {
       data.imageUrl = await this.s3Service.uploadFile(image);
